@@ -1,0 +1,679 @@
+<!doctype html><html lang=en><head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>RoadRakshak — Traffic Control Room</title>
+<style>
+:root{
+ --bg:#0a0d13; --pane:#121721; --pane2:#182030; --line:#232d3f; --line2:#2e3a4e;
+ --fg:#e9eef7; --mut:#8496b0; --dim:#5d6d85;
+ --amber:#f0a232; --red:#ff4d5a; --green:#3ddc97; --cyan:#31d0d6; --blue:#4a90ff;
+ --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);
+ font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+ overflow-x:hidden}
+
+/* ── top bar ─────────────────────────────────────────── */
+header{display:flex;align-items:center;gap:20px;padding:0 20px;height:58px;
+ background:linear-gradient(180deg,#141a26,#0e131c);border-bottom:1px solid var(--line);
+ position:sticky;top:0;z-index:40}
+.brand{font-weight:700;font-size:17px;letter-spacing:.02em;white-space:nowrap}
+.brand span{color:var(--amber)}
+.live{display:flex;align-items:center;gap:6px;font:600 10px/1 var(--mono);
+ letter-spacing:.14em;color:var(--red);border:1px solid rgba(255,77,90,.4);
+ padding:5px 9px;border-radius:4px;background:rgba(255,77,90,.08)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--red);
+ animation:blink 1.4s infinite}
+@keyframes blink{0%,45%{opacity:1}55%,100%{opacity:.25}}
+nav{display:flex;gap:4px;margin-left:8px}
+nav button{background:none;border:0;color:var(--mut);font:inherit;font-size:13px;
+ padding:8px 14px;border-radius:7px;cursor:pointer;white-space:nowrap}
+nav button:hover{background:var(--pane2);color:var(--fg)}
+nav button.on{background:var(--pane2);color:var(--fg);box-shadow:inset 0 -2px 0 var(--amber)}
+nav button .pill{display:inline-block;min-width:18px;padding:0 5px;margin-left:6px;
+ border-radius:9px;background:var(--red);color:#fff;font:700 10px/18px var(--mono);
+ text-align:center}
+.spacer{flex:1}
+.clock{font:600 13px var(--mono);color:var(--mut);letter-spacing:.04em}
+
+/* ── layout ──────────────────────────────────────────── */
+main{padding:18px 20px 40px;max-width:1680px;margin:0 auto}
+.page{display:none}.page.on{display:block}
+/* the camera page stays in the layout even when another tab is shown, so the
+   feeds keep playing and detections keep arriving instead of stalling */
+#p-cams{display:block}
+#p-cams:not(.on){position:fixed;left:-99999px;top:0;width:1400px;
+ pointer-events:none;opacity:0}
+.ttl{display:flex;align-items:baseline;gap:12px;margin:0 0 14px;flex-wrap:wrap}
+.ttl h2{margin:0;font-size:18px;font-weight:650;letter-spacing:-.01em}
+.ttl .sub{color:var(--dim);font:12px var(--mono)}
+
+/* ── camera wall ─────────────────────────────────────── */
+.wall{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+@media(max-width:900px){.wall{grid-template-columns:1fr}}
+.cam{background:#000;border:1px solid var(--line);border-radius:10px;overflow:hidden;
+ position:relative}
+
+.cam-hd{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#0e131c;
+ border-bottom:1px solid var(--line);flex-wrap:wrap}
+.cam-hd select{background:var(--pane2);color:var(--fg);border:1px solid var(--line2);
+ border-radius:6px;padding:5px 8px;font:600 12px var(--mono);cursor:pointer}
+.cam-loc{color:var(--mut);font:11.5px var(--mono);flex:1;min-width:80px;
+ overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tag{font:700 10px var(--mono);letter-spacing:.1em;padding:3px 7px;border-radius:4px;
+ background:rgba(61,220,151,.12);color:var(--green);border:1px solid rgba(61,220,151,.3)}
+.vidwrap{position:relative;aspect-ratio:16/10;background:#000}
+.vidwrap video{width:100%;height:100%;object-fit:cover;display:block}
+.scan{position:absolute;inset:0;pointer-events:none;
+ background:linear-gradient(180deg,transparent 0%,rgba(49,208,214,.05) 50%,transparent 100%);
+ animation:scan 3.6s linear infinite}
+@keyframes scan{0%{transform:translateY(-100%)}100%{transform:translateY(100%)}}
+.hud{position:absolute;left:8px;bottom:8px;right:8px;display:flex;
+ justify-content:space-between;align-items:flex-end;pointer-events:none}
+.hud .t{font:600 10.5px var(--mono);color:#cfe0f5;background:rgba(0,0,0,.55);
+ padding:3px 7px;border-radius:4px}
+
+
+.strip{margin-top:16px}
+.strip h3{font:600 11px var(--mono);letter-spacing:.14em;color:var(--dim);
+ text-transform:uppercase;margin:0 0 9px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{background:var(--pane);border:1px solid var(--line);border-radius:8px;
+ padding:9px 12px;cursor:pointer;min-width:158px;transition:.15s}
+.chip:hover{border-color:var(--line2);background:var(--pane2)}
+.chip.live{border-color:var(--amber);background:rgba(240,162,50,.07)}
+.chip .id{font:700 12px var(--mono);letter-spacing:.05em}
+.chip .lc{font:11px var(--mono);color:var(--mut);margin-top:2px}
+.chip .st{font:10px var(--mono);color:var(--green);margin-top:4px}
+.chip.live .st{color:var(--amber)}
+
+/* ── detections ──────────────────────────────────────── */
+.det{display:grid;grid-template-columns:1.7fr 1fr;gap:16px}
+@media(max-width:1000px){.det{grid-template-columns:1fr}}
+.card{background:var(--pane);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.card-hd{padding:11px 15px;border-bottom:1px solid var(--line);
+ font:600 11px var(--mono);letter-spacing:.13em;text-transform:uppercase;color:var(--mut)}
+.shot{width:100%;display:block;background:#000;max-height:520px;object-fit:contain}
+.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:12px;
+ padding:14px 15px}
+.meta .k{font:10px var(--mono);letter-spacing:.1em;color:var(--dim);text-transform:uppercase}
+.meta .v{font:600 14px var(--mono);margin-top:3px}
+.queue{max-height:640px;overflow-y:auto}
+.qi{display:flex;gap:11px;padding:10px 13px;border-bottom:1px solid var(--line);
+ cursor:pointer;transition:.15s}
+.qi:hover{background:var(--pane2)}
+.qi.new{animation:slide .5s ease}
+@keyframes slide{from{opacity:0;transform:translateX(-14px);background:rgba(255,77,90,.14)}}
+.qi img{width:88px;height:56px;object-fit:cover;border-radius:5px;background:#000;flex:0 0 auto}
+.qi .qm{min-width:0;flex:1}
+.qi .qt{font:700 12px var(--mono)}
+.qi .qs{font:11px var(--mono);color:var(--mut);margin-top:2px;
+ overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ── badges / plates ─────────────────────────────────── */
+.bdg{display:inline-block;padding:3px 9px;border-radius:11px;font:600 11px var(--mono);
+ white-space:nowrap}
+.b-red{background:rgba(255,77,90,.15);color:#ff8d96;border:1px solid rgba(255,77,90,.36)}
+.b-amb{background:rgba(240,162,50,.15);color:#f7c274;border:1px solid rgba(240,162,50,.36)}
+.b-grn{background:rgba(61,220,151,.14);color:#79e8bb;border:1px solid rgba(61,220,151,.34)}
+.b-blu{background:rgba(74,144,255,.14);color:#8fbaff;border:1px solid rgba(74,144,255,.34)}
+.plate{font:700 13px var(--mono);letter-spacing:.11em;background:#f4f4ee;color:#111;
+ padding:4px 10px;border-radius:4px;border:2px solid #111;display:inline-block;
+ white-space:nowrap}
+.plate.edit{background:#fffbe6;border-color:var(--amber)}
+/* an unread plate must look unread, not like an empty plate */
+.plate.unread{background:transparent;color:var(--mut);border:1px dashed var(--line);
+ font-weight:400;letter-spacing:.05em}
+
+/* ── tables ──────────────────────────────────────────── */
+.bar{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-bottom:13px}
+select.f,input.f{background:var(--pane2);color:var(--fg);border:1px solid var(--line2);
+ border-radius:7px;padding:8px 11px;font:inherit;font-size:13px}
+button.btn{background:var(--pane2);color:var(--fg);border:1px solid var(--line2);
+ border-radius:7px;padding:8px 13px;font:inherit;font-size:13px;cursor:pointer}
+button.btn:hover{background:#212b3c}
+button.btn.pri{background:var(--amber);border-color:var(--amber);color:#17181a;font-weight:650}
+button.btn.pri:hover{filter:brightness(1.08)}
+button.btn.dgr{background:var(--red);border-color:var(--red);color:#fff;font-weight:650}
+.tblwrap{border:1px solid var(--line);border-radius:10px;overflow:auto;background:var(--pane)}
+table{border-collapse:collapse;width:100%;min-width:940px;font-size:13px}
+th{background:var(--pane2);text-align:left;padding:11px 13px;border-bottom:1px solid var(--line);
+ font:600 10px var(--mono);letter-spacing:.11em;text-transform:uppercase;color:var(--mut);
+ position:sticky;top:0;white-space:nowrap}
+td{padding:10px 13px;border-bottom:1px solid #1a2130;vertical-align:middle}
+tr:last-child td{border-bottom:0}
+tbody tr{cursor:pointer}
+tbody tr:hover td{background:#161e2c}
+.mono{font:12px var(--mono);color:var(--mut)}
+
+/* ── analytics ───────────────────────────────────────── */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:13px;
+ margin-bottom:18px}
+.tile{background:var(--pane);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.tile .k{font:10px var(--mono);letter-spacing:.11em;color:var(--dim);text-transform:uppercase}
+.tile .v{font:700 27px var(--mono);margin-top:5px;letter-spacing:-.02em}
+.tile .v.sm{font-size:16px;font-weight:650}
+.tile.hot{border-color:var(--red);background:linear-gradient(160deg,rgba(255,77,90,.09),transparent)}
+.tile.hot .v{color:var(--red)}
+.grid2{display:grid;grid-template-columns:1.25fr 1fr;gap:16px}
+@media(max-width:1000px){.grid2{grid-template-columns:1fr}}
+.rows{padding:14px 16px;display:flex;flex-direction:column;gap:11px}
+.row{display:grid;grid-template-columns:150px 1fr 54px;align-items:center;gap:11px}
+.row .nm{font:12px var(--mono);color:var(--mut);overflow:hidden;text-overflow:ellipsis;
+ white-space:nowrap}
+.track{height:19px;background:var(--pane2);border-radius:4px;overflow:hidden}
+.fill{height:100%;border-radius:4px;transition:width .8s cubic-bezier(.22,.9,.3,1)}
+.row .n{font:700 13px var(--mono);text-align:right}
+
+/* ── modal ───────────────────────────────────────────── */
+.mask{position:fixed;inset:0;background:rgba(4,6,10,.82);display:none;
+ align-items:center;justify-content:center;z-index:60;padding:22px}
+.mask.on{display:flex}
+.modal{background:var(--pane);border:1px solid var(--line2);border-radius:12px;
+ max-width:920px;width:100%;max-height:92vh;overflow-y:auto}
+.modal-hd{display:flex;align-items:center;gap:12px;padding:15px 19px;
+ border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--pane);z-index:2}
+.modal-hd h3{margin:0;font:700 15px var(--mono);letter-spacing:.03em}
+.modal-bd{padding:17px 19px}
+.modal-bd img{width:100%;border-radius:8px;background:#000;margin-bottom:15px}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;
+ margin-bottom:17px}
+.kv .k{font:10px var(--mono);letter-spacing:.1em;color:var(--dim);text-transform:uppercase}
+.kv .v{font:600 14px var(--mono);margin-top:4px}
+.acts{display:flex;gap:9px;flex-wrap:wrap;padding-top:15px;border-top:1px solid var(--line)}
+.x{margin-left:auto;background:none;border:0;color:var(--mut);font-size:22px;cursor:pointer;
+ line-height:1;padding:0 4px}
+.x:hover{color:var(--fg)}
+
+/* ── toast ───────────────────────────────────────────── */
+#toast{position:fixed;right:20px;bottom:20px;display:flex;flex-direction:column;
+ gap:9px;z-index:80}
+.tst{background:var(--pane2);border:1px solid var(--line2);border-left:3px solid var(--green);
+ border-radius:8px;padding:11px 15px;font:13px var(--mono);box-shadow:0 8px 28px rgba(0,0,0,.5);
+ animation:pop .3s ease}
+.tst.warn{border-left-color:var(--amber)}
+@keyframes pop{from{opacity:0;transform:translateX(24px)}}
+.empty{padding:44px;text-align:center;color:var(--dim);font:13px var(--mono)}
+</style></head><body>
+
+<header>
+  <div class=brand>Road<span>Rakshak</span></div>
+  <div class=live><span class=dot></span>LIVE</div>
+  <nav>
+    <button class=on data-p=cams>Camera Wall</button>
+    <button data-p=det>Detections<span class=pill id=pDet>0</span></button>
+    <button data-p=vio>Violations</button>
+    <button data-p=ana>Analytics</button>
+  </nav>
+  <div class=spacer></div>
+  <div class=clock id=clk>--:--:--</div>
+</header>
+
+<main>
+  <!-- ══ CAMERA WALL ══ -->
+  <section class="page on" id=p-cams>
+    <div class=ttl><h2>Camera Wall</h2>
+      <span class=sub id=camSub>4 of 8 feeds active</span>
+      <span class=sub style="margin-left:auto">Demo · recorded footage · sample records</span></div>
+    <div class=wall id=wall></div>
+    <div class=strip>
+      <h3>All cameras — click to load into a panel</h3>
+      <div class=chips id=chips></div>
+    </div>
+  </section>
+
+  <!-- ══ DETECTIONS ══ -->
+  <section class=page id=p-det>
+    <div class=ttl><h2>Violation Detected</h2>
+      <span class=sub id=detSub>waiting for detections…</span></div>
+    <div class=det>
+      <div class=card>
+        <div class=card-hd>Most recent capture</div>
+        <img class=shot id=bigShot alt="Latest violation capture">
+        <div class=meta id=bigMeta></div>
+      </div>
+      <div class=card>
+        <div class=card-hd>Detection feed</div>
+        <div class=queue id=queue><div class=empty>No detections yet</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ VIOLATIONS ══ -->
+  <section class=page id=p-vio>
+    <div class=ttl><h2>Violation Records</h2>
+      <span class=sub>click a row for evidence and challan</span></div>
+    <div class=bar>
+      <select class=f id=fCam><option value="">All cameras</option></select>
+      <select class=f id=fType><option value="">All violations</option></select>
+      <select class=f id=fStat>
+        <option value="">All statuses</option>
+        <option>PENDING</option><option>CHALLAN GENERATED</option><option>REJECTED</option>
+      </select>
+      <input class=f id=q placeholder="search plate / location" size=22>
+      <button class=btn onclick="resetF()">Reset</button>
+      <span class=mono id=shown></span>
+    </div>
+    <div class=tblwrap><table>
+      <thead><tr>
+        <th>Challan ID</th><th>Number plate</th><th>Vehicle</th><th>Violation</th>
+        <th>Camera</th><th>Location</th><th>Fine</th><th>Status</th><th></th>
+      </tr></thead><tbody id=tb></tbody></table>
+      <div class=empty id=noRows style=display:none>No records yet — detections appear as the feeds run.</div>
+    </div>
+  </section>
+
+  <!-- ══ ANALYTICS ══ -->
+  <section class=page id=p-ana>
+    <div class=ttl><h2>Enforcement Analytics</h2>
+      <span class=sub>hotspots and violation mix</span></div>
+    <div class=tiles id=tiles></div>
+    <div class=grid2>
+      <div class=card>
+        <div class=card-hd>Violations by location</div>
+        <div class=rows id=byLoc></div>
+      </div>
+      <div class=card>
+        <div class=card-hd>Violations by type</div>
+        <div class=rows id=byType></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class=mask id=mask><div class=modal id=modal></div></div>
+<div id=toast></div>
+
+<script>
+const S=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const money=n=>'₹'+Number(n||0).toLocaleString('en-IN');
+
+let DATA={cameras:[],events:[]}, PANELS=[0,1,2,3], LOG=[], SEEN=new Set();
+
+// ── boot ──────────────────────────────────────────────
+Promise.all([
+  fetch('demo_data.json').then(r=>r.json()),
+  fetch('violations.json').then(r=>r.json()).catch(()=>({files:[]}))
+]).then(([d,v])=>{
+  DATA=d;
+  DATA.events=schedule(v.files||[],d);
+  if(!DATA.events.length){
+    S('camSub').textContent='no violation images on this site';
+  }
+  buildWall(); buildChips(); buildFilters(); tickClock();
+  setInterval(tickClock,1000);
+}).catch(()=>{S('camSub').textContent='site data missing';});
+
+/* Turn the contents of demo/violation/ into a playback schedule.
+
+   The NUMBER PLATE IS THE FILENAME, so renaming a file is all it takes to
+   change the plate shown in the feed, the records table and the challan.
+   An optional __TYPE suffix pins the violation:
+       UP32AK1234.jpg                -> plate UP32 AK1234, type cycles
+       UP32AK1234__NO_HELMET.jpg     -> plate UP32 AK1234, type NO_HELMET      */
+function schedule(files,d){
+  const types=d.violations||[];
+  const cams=d.cameras||[];
+  if(!files.length||!cams.length) return [];
+  const seen={};
+  return files.map((f,i)=>{
+    const stem=f.replace(/\.(jpe?g|png|webp)$/i,'');
+    const parts=stem.split('__');
+    const raw=(parts[0]||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+    const pinned=parts[1]?parts[1].toUpperCase():null;
+    const t=types.find(x=>x.key===pinned)||types[i%types.length];
+    // third segment pins the camera; otherwise deal round-robin
+    const wantCam=parts[2]?parts[2].toUpperCase():null;
+    const cam=cams.find(c=>c.id===wantCam)||cams[i%cams.length];
+    // stagger WITHIN a camera: two stills pinned to the same camera used to
+    // share a global slot and fire at the identical second
+    seen[cam.id]=(seen[cam.id]||0)+1;
+    const slotN=seen[cam.id]-1;
+    // an unreadable plate is not a dropped violation - it goes to manual entry
+    const unread=!raw||['UNKNOWN','UNREAD','NA','NONE','UNDETERMINED'].includes(raw);
+    const dur=cam.duration||20;
+    return {
+      id:'RRK-2026-'+String(i+1).padStart(5,'0'),
+      file:f, image:'violation/'+encodeURIComponent(f),
+      plate:unread?null:(prettyPlate(raw)||stem),
+      plateSource:unread?'manual_entry_required':'ocr',
+      camera:cam.id, location:cam.location, city:d.city||'',
+      at:Math.min(Math.max(2,dur-1.5), dur*(0.18+0.34*slotN)),
+      type:t.key, label:t.label, severity:t.severity,
+      fine:t.fine, section:t.section, note:t.note||'',
+      vehicle:VEHICLE[(parts[3]||'').toUpperCase()]
+              || ((t.key==='NO_HELMET'||t.key==='TRIPLE_RIDING')?'Two Wheeler':'Car'),
+      speed:t.key==='OVER_SPEEDING'?(78+(i*13)%46):null,
+      limit:t.key==='OVER_SPEEDING'?60:null,
+      confidence:+(0.87+((i*7)%11)/100).toFixed(2),
+      sourceVideo:cam.source_video||'',
+      capturedAt:cam.captured_at||'',
+      // the moment of the offence: when the clip was shot, plus the offset into it
+      occurredAt:offsetTime(cam.captured_at,
+                 Math.min(Math.max(2,dur-1.5), dur*(0.18+0.34*slotN))),
+    };
+  });
+}
+const VEHICLE={BIKE:'Two Wheeler',TW:'Two Wheeler',CAR:'Car',AUTO:'Auto Rickshaw',
+               GOODS:'Goods Vehicle',TRUCK:'Goods Vehicle',BUS:'Bus'};
+
+/* Clip start + seconds into the clip = when the offence actually happened. */
+function offsetTime(iso, secs){
+  if(!iso) return '';
+  const d=new Date(iso);
+  if(isNaN(d)) return '';
+  return new Date(d.getTime()+secs*1000).toISOString();
+}
+function fmtIST(iso){
+  if(!iso) return '—';
+  const d=new Date(iso);
+  if(isNaN(d)) return '—';
+  return d.toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',
+    hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true,
+    timeZone:'Asia/Kolkata'});
+}
+
+/* UP32AK1234 -> "UP32 AK1234" for a plate that reads like a plate. */
+function prettyPlate(s){
+  if(!s) return '';
+  const m=s.match(/^([A-Z]{2}\d{1,2})([A-Z]{0,3}\d{1,4})$/);
+  return m?`${m[1]} ${m[2]}`:s;
+}
+
+function tickClock(){
+  const n=new Date();
+  S('clk').textContent=n.toTimeString().slice(0,8)+' IST';
+}
+
+// ── camera wall ───────────────────────────────────────
+function buildWall(){
+  S('wall').innerHTML=PANELS.map((ci,i)=>panelHTML(i,DATA.cameras[ci])).join('');
+  PANELS.forEach((ci,i)=>wire(i));
+  keepPlaying();
+  S('camSub').textContent=`${PANELS.length} of ${DATA.cameras.length} feeds active`;
+}
+function panelHTML(i,c){
+  if(!c) return '';
+  const opts=DATA.cameras.map((x,ix)=>
+    `<option value="${ix}"${x.id===c.id?' selected':''}>${esc(x.id)}</option>`).join('');
+  return `<div class=cam id="cam${i}">
+    <div class=cam-hd>
+      <select onchange="swap(${i},this.value)">${opts}</select>
+      <span class=cam-loc>${esc(c.location)}, ${esc(c.city)}</span>
+      <span class=tag>ONLINE</span>
+    </div>
+    <div class=vidwrap>
+      <video id="v${i}" src="${esc(c.video)}" autoplay muted loop playsinline></video>
+      <div class=scan></div>
+      <div class=hud>
+        <span class=t id="ht${i}">${esc(c.id)}</span>
+        <span class=t id="hf${i}">AI · 15 FPS</span>
+      </div>
+    </div></div>`;
+}
+function wire(i){
+  const v=S('v'+i); if(!v) return;
+  let last=0;
+  v.addEventListener('timeupdate',()=>{
+    const cam=DATA.cameras[PANELS[i]]; if(!cam) return;
+    const t=v.currentTime;
+    if(t<last-0.4){ SEEN.forEach(k=>{ if(k.startsWith(cam.id+'|')) SEEN.delete(k); }); }
+    last=t;
+    S('ht'+i).textContent=`${cam.id}  ${fmt(t)}`;
+    DATA.events.filter(e=>e.camera===cam.id).forEach(e=>{
+      const key=cam.id+'|'+e.id;
+      if(!SEEN.has(key) && t>=e.at && t<e.at+1.2){ SEEN.add(key); fire(e); }
+    });
+  });
+  v.play().catch(()=>{});
+}
+
+/* Browsers pause media when the view is hidden or the tab loses focus, and do
+   not resume on return — which silently stops the whole detection feed. */
+function keepPlaying(){
+  document.querySelectorAll('.vidwrap video').forEach(v=>{
+    if(v.paused && v.readyState >= 2) v.play().catch(()=>{});
+  });
+}
+setInterval(keepPlaying, 1200);
+document.addEventListener('visibilitychange', keepPlaying);
+window.addEventListener('focus', keepPlaying);
+function fmt(s){const m=Math.floor(s/60),x=(s%60).toFixed(1).padStart(4,'0');return `${String(m).padStart(2,'0')}:${x}`;}
+
+function swap(panel,camIndex){
+  PANELS[panel]=Number(camIndex);
+  buildWall(); buildChips();
+}
+function buildChips(){
+  S('chips').innerHTML=DATA.cameras.map((c,ix)=>{
+    const on=PANELS.includes(ix);
+    return `<div class="chip${on?' live':''}" onclick="loadChip(${ix})">
+      <div class=id>${esc(c.id)}</div>
+      <div class=lc>${esc(c.location)}</div>
+      <div class=st>${on?'● ON WALL':'○ standby'}</div></div>`;}).join('');
+}
+function loadChip(ix){
+  if(PANELS.includes(ix)) return;
+  PANELS[0]=ix; buildWall(); buildChips();
+  toast(`${DATA.cameras[ix].id} loaded into panel 1`);
+}
+
+// ── a violation fires ─────────────────────────────────
+/* The camera wall stays a clean monitoring view — violations surface on the
+   Detections page, not as alarms over the feeds. */
+function fire(e){
+  // record each vehicle once: the clips loop, and without this the same
+  // challan id was written twice. One record per vehicle per violation is the
+  // dedup rule the real pipeline applies at track level.
+  if(LOG.some(r=>r.id===e.id)) return;
+  const rec=Object.assign({},e,{
+    ts:new Date().toTimeString().slice(0,8),
+    status:'PENDING'
+  });
+  LOG.unshift(rec);
+  S('pDet').textContent=LOG.length;
+  renderBig(rec); renderQueue(); renderTable(); renderAna();
+}
+
+function renderBig(r){
+  S('bigShot').src=r.image;
+  S('detSub').textContent=`${LOG.length} detection${LOG.length===1?'':'s'} this session`;
+  S('bigMeta').innerHTML=`
+    <div><div class=k>Violation</div><div class=v>
+      <span class="bdg ${r.severity==='red'?'b-red':'b-amb'}">${esc(r.label)}</span></div></div>
+    <div><div class=k>Camera</div><div class=v>${esc(r.camera)}</div></div>
+    <div><div class=k>Location</div><div class=v style=font-size:13px>${esc(r.location)}</div></div>
+    <div><div class=k>Number plate</div><div class=v><span class="plate${r.plate?'':' unread'}">${r.plate?esc(r.plate):'NOT READ'}</span></div></div>
+    <div><div class=k>Source footage</div><div class="v mono sm">${esc(r.sourceVideo||'—')}</div></div>
+    <div><div class=k>Occurred at</div><div class="v mono sm">${esc(fmtIST(r.occurredAt))}</div></div>
+    <div><div class=k>Vehicle</div><div class=v>${esc(r.vehicle)}</div></div>
+    ${r.speed?`<div><div class=k>Speed</div><div class=v style=color:var(--red)>${r.speed} km/h <span style="color:var(--dim);font-size:11px">/ ${r.limit}</span></div></div>`:''}
+    <div><div class=k>Confidence</div><div class=v>${(r.confidence*100).toFixed(0)}%</div></div>
+    <div><div class=k>Detected at</div><div class=v>${esc(r.ts)}</div></div>`;
+}
+function renderQueue(){
+  S('queue').innerHTML=LOG.slice(0,26).map((r,i)=>`
+    <div class="qi${i===0?' new':''}" onclick='openRec("${r.id}")'>
+      <img src="${r.image}" alt="">
+      <div class=qm>
+        <div class=qt>${esc(r.label)}</div>
+        <div class=qs>${esc(r.camera)} · ${esc(r.location)}</div>
+        <div class=qs style="color:var(--dim)">${esc(r.plate)} · ${esc(r.ts)}</div>
+      </div></div>`).join('') || '<div class=empty>No detections yet</div>';
+}
+
+// ── violation table ───────────────────────────────────
+function buildFilters(){
+  DATA.cameras.forEach(c=>S('fCam').add(new Option(c.id,c.id)));
+  (DATA.violations||[]).forEach(v=>S('fType').add(new Option(v.label,v.key)));
+  ['fCam','fType','fStat'].forEach(i=>S(i).onchange=renderTable);
+  S('q').oninput=renderTable;
+}
+function resetF(){['fCam','fType','fStat'].forEach(i=>S(i).value='');S('q').value='';renderTable();}
+function filtered(){
+  const c=S('fCam').value,t=S('fType').value,s=S('fStat').value,
+        q=S('q').value.trim().toUpperCase();
+  return LOG.filter(r=>(!c||r.camera===c)&&(!t||r.type===t)&&(!s||r.status===s)
+    &&(!q||[r.plate,r.location,r.id].some(x=>String(x).toUpperCase().includes(q))));
+}
+function renderTable(){
+  const rows=filtered();
+  S('shown').textContent=`${rows.length} of ${LOG.length} records`;
+  S('noRows').style.display=rows.length?'none':'block';
+  S('tb').innerHTML=rows.map(r=>`<tr onclick='openRec("${r.id}")'>
+    <td class=mono>${esc(r.id)}</td>
+    <td><span class="plate${r.edited?' edit':''}${r.plate?'':' unread'}">${r.plate?esc(r.plate):'NOT READ'}</span></td>
+    <td class=mono>${esc(r.vehicle)}</td>
+    <td><span class="bdg ${r.severity==='red'?'b-red':'b-amb'}">${esc(r.label)}</span></td>
+    <td class=mono>${esc(r.camera)}</td>
+    <td class=mono>${esc(r.location)}</td>
+    <td class=mono>${money(r.fine)}</td>
+    <td><span class="bdg ${r.status==='CHALLAN GENERATED'?'b-grn':r.status==='REJECTED'?'b-blu':'b-amb'}">${esc(r.status)}</span></td>
+    <td><button class=btn onclick='event.stopPropagation();editPlate("${r.id}")'>Re-enter plate</button></td>
+  </tr>`).join('');
+}
+
+function editPlate(id){
+  const r=LOG.find(x=>x.id===id); if(!r) return;
+  const val=prompt(`Re-enter the number plate for ${id}\n\nCurrent reading: ${r.plate}`,r.plate);
+  if(val===null) return;
+  const clean=val.toUpperCase().replace(/\s+/g,' ').trim();
+  if(!clean){toast('Plate cannot be empty','warn');return;}
+  r.plate=clean; r.edited=true;
+  renderTable(); renderQueue();
+  if(LOG[0]&&LOG[0].id===id) renderBig(LOG[0]);
+  toast(`Plate updated to ${clean}`);
+}
+
+// ── record modal ──────────────────────────────────────
+function openRec(id){
+  const r=LOG.find(x=>x.id===id); if(!r) return;
+  S('modal').innerHTML=`
+    <div class=modal-hd>
+      <h3>${esc(r.id)}</h3>
+      <span class="bdg ${r.severity==='red'?'b-red':'b-amb'}">${esc(r.label)}</span>
+      <span class="bdg ${r.status==='CHALLAN GENERATED'?'b-grn':r.status==='REJECTED'?'b-blu':'b-amb'}">${esc(r.status)}</span>
+      <button class=x onclick="closeM()">&times;</button>
+    </div>
+    <div class=modal-bd>
+      <img src="${r.image}" alt="Evidence for ${esc(r.id)}">
+      <div class=kv>
+        <div><div class=k>Number plate</div><div class=v>
+          <span class="plate${r.edited?' edit':''}${r.plate?'':' unread'}">${r.plate?esc(r.plate):'NOT READ'}</span>
+          ${r.edited?'<div style="font:10px var(--mono);color:var(--amber);margin-top:5px">manually corrected</div>':''}</div></div>
+        <div><div class=k>Vehicle</div><div class=v>${esc(r.vehicle)}</div></div>
+        <div><div class=k>Camera</div><div class=v>${esc(r.camera)}</div></div>
+        <div><div class=k>Location</div><div class=v style=font-size:13px>${esc(r.location)}, ${esc(r.city)}</div></div>
+        <div><div class=k>Detected</div><div class=v>${esc(r.ts)}</div></div>
+        <div><div class=k>Video position</div><div class=v>${fmt(r.at)}</div></div>
+        ${r.speed?`<div><div class=k>Recorded speed</div><div class=v style=color:var(--red)>${r.speed} km/h</div></div>
+        <div><div class=k>Speed limit</div><div class=v>${r.limit} km/h</div></div>`:''}
+        <div><div class=k>MV Act section</div><div class=v>${esc(r.section)}</div></div>
+        <div><div class=k>Source footage</div><div class=v style="font-size:12px">${esc(r.sourceVideo||'—')}</div></div>
+        <div><div class=k>Clip recorded</div><div class=v style="font-size:12px">${esc(fmtIST(r.capturedAt))}</div></div>
+        <div><div class=k>Offence at</div><div class=v style="font-size:12px">${esc(fmtIST(r.occurredAt))}</div></div>
+        <div><div class=k>Fine payable</div><div class=v>${money(r.fine)}</div></div>
+        <div><div class=k>AI confidence</div><div class=v>${(r.confidence*100).toFixed(0)}%</div></div>
+      </div>
+      <div class=acts>
+        <button class="btn pri" onclick='generateChallan("${r.id}")'>Generate Challan</button>
+        <button class=btn onclick='editPlate("${r.id}");closeM()'>Re-enter plate</button>
+        <button class="btn dgr" onclick='rejectRec("${r.id}")'>Reject</button>
+        <button class=btn onclick="closeM()">Close</button>
+      </div>
+    </div>`;
+  S('mask').classList.add('on');
+}
+function closeM(){S('mask').classList.remove('on');}
+S('mask').addEventListener('click',e=>{if(e.target===S('mask'))closeM();});
+addEventListener('keydown',e=>{if(e.key==='Escape')closeM();});
+
+/* Opens the printable challan with this record filled in. Nothing is
+   dispatched from the dashboard — an officer reviews the document and prints
+   or saves it, which is the whole point of the PENDING state. */
+function generateChallan(id){
+  const r=LOG.find(x=>x.id===id); if(!r) return;
+  if(!r.plate){
+    toast('Plate not read — enter it with "Re-enter plate" before generating a challan');
+    return;
+  }
+  const q=new URLSearchParams({
+    challanId:'CHL-'+r.id.replace(/[^0-9]/g,'').slice(-8),
+    plateNumber:r.plate,
+    violationType:r.type,
+    location:`${r.location}, ${r.city}`,
+    cameraId:r.camera,
+    timing:r.occurredAt||new Date().toISOString(),
+    images:r.image,
+  });
+  if(r.speed) q.set('speed',r.speed);
+  if(r.note) q.set('note',r.note);
+  if(r.sourceVideo) q.set('source',r.sourceVideo);
+  if(r.capturedAt) q.set('captured',r.capturedAt);
+  window.open('challan.html?'+q.toString(),'_blank');
+  r.status='CHALLAN GENERATED';
+  renderTable(); renderAna(); closeM();
+  toast(`Challan document opened for ${r.plate} — review, then print`);
+}
+function rejectRec(id){
+  const r=LOG.find(x=>x.id===id); if(!r) return;
+  r.status='REJECTED';
+  renderTable(); renderAna(); closeM();
+  toast(`${id} rejected — returned as training data`,'warn');
+}
+
+// ── analytics ─────────────────────────────────────────
+function renderAna(){
+  const byL={},byT={},byS={};
+  LOG.forEach(r=>{
+    byL[r.location]=(byL[r.location]||0)+1;
+    byT[r.label]=(byT[r.label]||0)+1;
+    byS[r.status]=(byS[r.status]||0)+1;
+  });
+  const L=Object.entries(byL).sort((a,b)=>b[1]-a[1]);
+  const T=Object.entries(byT).sort((a,b)=>b[1]-a[1]);
+  const fines=LOG.filter(r=>r.status==='CHALLAN GENERATED').reduce((s,r)=>s+r.fine,0);
+  const hot=L[0]?L[0][0]:'—';
+
+  S('tiles').innerHTML=`
+    <div class="tile hot"><div class=k>Worst hotspot</div>
+      <div class="v sm">${esc(hot)}</div>
+      <div class=k style="margin-top:6px">${L[0]?L[0][1]:0} violations</div></div>
+    <div class=tile><div class=k>Total violations</div><div class=v>${LOG.length}</div></div>
+    <div class=tile><div class=k>Challans generated</div><div class=v>${byS['CHALLAN GENERATED']||0}</div></div>
+    <div class=tile><div class=k>Pending review</div><div class=v>${byS.PENDING||0}</div></div>
+    <div class=tile><div class=k>Fine value</div><div class="v sm">${money(fines)}</div></div>
+    <div class=tile><div class=k>Active cameras</div><div class=v>${DATA.cameras.length}</div></div>`;
+
+  const mx=Math.max(1,...L.map(x=>x[1]));
+  S('byLoc').innerHTML=L.map(([k,v],i)=>`
+    <div class=row><div class=nm title="${esc(k)}">${esc(k)}</div>
+      <div class=track><div class=fill style="width:${100*v/mx}%;background:${i===0?'var(--red)':'var(--amber)'}"></div></div>
+      <div class=n>${v}</div></div>`).join('')||'<div class=empty>No data yet</div>';
+
+  const mt=Math.max(1,...T.map(x=>x[1]));
+  const col={'No Helmet':'var(--red)','Triple Riding':'var(--amber)',
+             'Over Speeding':'var(--cyan)','No Seatbelt':'var(--blue)'};
+  S('byType').innerHTML=T.map(([k,v])=>`
+    <div class=row><div class=nm>${esc(k)}</div>
+      <div class=track><div class=fill style="width:${100*v/mt}%;background:${col[k]||'var(--amber)'}"></div></div>
+      <div class=n>${v}</div></div>`).join('')||'<div class=empty>No data yet</div>';
+}
+
+// ── nav + toast ───────────────────────────────────────
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); S('p-'+b.dataset.p).classList.add('on');
+  keepPlaying();
+  if(b.dataset.p==='ana') renderAna();
+});
+function toast(msg,kind){
+  const d=document.createElement('div');
+  d.className='tst'+(kind==='warn'?' warn':''); d.textContent=msg;
+  S('toast').appendChild(d);
+  setTimeout(()=>d.remove(),4200);
+}
+</script></body></html>

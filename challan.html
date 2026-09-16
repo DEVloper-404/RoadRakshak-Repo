@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Traffic Challan</title>
+<style>
+  @page { size: A4; margin: 0; }
+
+  * {
+    box-sizing: border-box;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    color-adjust: exact;
+  }
+
+  .print-bar {
+    width: 210mm;
+    margin: 0 auto 12px auto;
+    display: flex;
+    justify-content: flex-end;
+  }
+  .print-btn {
+    background: #0d1b2a;
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .print-btn:hover { background: #16283d; }
+
+  body {
+    margin: 0;
+    padding: 24px;
+    background: #e9e9e9;
+    font-family: Helvetica, Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .challan {
+    background: #ffffff;
+    width: 210mm;
+    min-height: 297mm;
+    padding: 14mm;
+    position: relative;
+    border: 1px solid #b8b8b8;
+    outline: 1px solid #b8b8b8;
+    outline-offset: -6px;
+  }
+
+  /* ---- Seal ---- */
+  .seal {
+    position: absolute;
+    top: 16mm;
+    right: 16mm;
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    border: 1.2px solid #7a1f2b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .seal::before {
+    content: "";
+    position: absolute;
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    border: 0.6px solid #7a1f2b;
+  }
+  .seal-text {
+    text-align: center;
+    color: #7a1f2b;
+    line-height: 1.25;
+  }
+  .seal-text .l1 { font-size: 6.5px; font-weight: 700; font-family: Helvetica, Arial, sans-serif; }
+  .seal-text .l2 { font-size: 6.5px; font-weight: 700; font-family: Helvetica, Arial, sans-serif; }
+  .seal-text .l3 { font-size: 5.5px; font-family: Helvetica, Arial, sans-serif; }
+
+  /* ---- Header ---- */
+  .header { text-align: center; padding-top: 4mm; }
+  .gov-line {
+    font-family: "Courier New", Courier, monospace;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: #555555;
+    margin: 0 0 6px 0;
+  }
+  .title {
+    font-family: "Courier New", Courier, monospace;
+    font-weight: 700;
+    font-size: 30px;
+    letter-spacing: 3px;
+    color: #0d1b2a;
+    margin: 0 0 6px 0;
+  }
+  .subtitle {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 11px;
+    color: #666666;
+    margin: 0 0 10px 0;
+  }
+  .thick-rule { border: none; border-top: 2.2px solid #000000; margin: 0 0 8mm 0; }
+
+  /* ---- Details grid ---- */
+  .details {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 6mm;
+  }
+  .details .field {
+    width: 50%;
+    box-sizing: border-box;
+    padding-right: 12mm;
+    margin-bottom: 8mm;
+  }
+  .field .label {
+    font-size: 9px;
+    letter-spacing: 0.5px;
+    color: #777777;
+    margin-bottom: 4px;
+  }
+  .field .value {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1a1a1a;
+  }
+
+  .fine-row { margin-bottom: 4mm; width: 100%; }
+  .fine-row .value {
+    font-size: 22px;
+    color: #b00020;
+  }
+  .fine-divider { border: none; border-top: 0.5px solid #dddddd; margin: 4mm 0 8mm 0; }
+
+  /* ---- Evidence photos ---- */
+  .evidence-label {
+    font-size: 9px;
+    letter-spacing: 0.5px;
+    color: #777777;
+    margin-bottom: 6px;
+  }
+  .evidence-grid {
+    display: flex;
+    gap: 12px;
+  }
+  .evidence-frame {
+    flex: 1;
+    min-width: 0;
+    height: 62mm;
+    background: #232833;
+    border: 2px solid #4fb3e8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #b8bcc4;
+    font-size: 11px;
+    text-align: center;
+    line-height: 1.6;
+  }
+  .evidence-frame.alt { border-color: #e89a5f; }
+  .evidence-frame img { width: 100%; height: 100%; object-fit: contain; background:#232833; }
+
+  /* ---- Footer ---- */
+  .footer {
+    margin-top: 10mm;
+    font-size: 8.5px;
+    color: #888888;
+    line-height: 1.5;
+  }
+
+  .details .field,
+  .fine-row,
+  .evidence-grid,
+  .seal,
+  .header {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  @media print {
+    body { background: #ffffff; padding: 0; margin: 0; display: block; }
+    .challan {
+      border: none;
+      outline: none;
+      width: auto;
+      min-height: auto;
+      padding: 14mm;
+      box-shadow: none;
+    }
+    .print-bar { display: none; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="print-bar">
+    <button class="print-btn" onclick="window.print()">Print / Save as PDF</button>
+  </div>
+
+  <div class="challan" id="challan">
+
+    <div class="seal">
+      <div class="seal-text">
+        <div class="l1">AI VERIFIED</div>
+        <div class="l2">E-CHALLAN</div>
+        <div class="l3">ROADRAKSHAK</div>
+      </div>
+    </div>
+
+    <div class="header">
+      <p class="gov-line">GOVERNMENT OF UTTAR PRADESH &nbsp;&middot;&nbsp; TRAFFIC POLICE</p>
+      <h1 class="title">TRAFFIC CHALLAN</h1>
+      <p class="subtitle">Issued under Motor Vehicles Act, 1988 &nbsp;&middot;&nbsp; AI-Assisted Detection</p>
+    </div>
+    <hr class="thick-rule">
+
+    <div class="details">
+      <div class="field"><div class="label">CHALLAN ID</div><div class="value" data-field="challanId">CHL-3360D54B89</div></div>
+      <div class="field"><div class="label">ISSUE DATE</div><div class="value" data-field="issueDate">17 Aug 2026, 07:31 AM</div></div>
+
+      <div class="field"><div class="label">VEHICLE PLATE NUMBER</div><div class="value" data-field="plateNumber">UP16AB1234</div></div>
+      <div class="field"><div class="label">VIOLATION TYPE</div><div class="value" data-field="violationType">No Helmet</div></div>
+
+      <div class="field"><div class="label">LOCATION</div><div class="value" data-field="location">Hazratganj Crossing, LKO</div></div>
+      <div class="field"><div class="label">CAMERA ID</div><div class="value" data-field="cameraId">CAM-01</div></div>
+
+      <div class="field"><div class="label">DATE &amp; TIME OF VIOLATION</div><div class="value" data-field="timing">16 Aug 2026, 11:57 PM</div></div>
+      <div class="field"><div class="label">LEGAL SECTION</div><div class="value" data-field="legalSection">Section 129, Motor Vehicles Act</div></div>
+
+      <div class="field"><div class="label">SOURCE FOOTAGE</div><div class="value" data-field="sourceVideo">&mdash;</div></div>
+      <div class="field"><div class="label">FOOTAGE RECORDED</div><div class="value" data-field="captured">&mdash;</div></div>
+    </div>
+
+    <div class="fine-row field">
+      <div class="label">FINE AMOUNT</div>
+      <div class="value" data-field="fineAmount">Rs. 1,000</div>
+    </div>
+    <hr class="fine-divider">
+
+    <div class="evidence-label">EVIDENCE PHOTOS</div>
+    <div class="evidence-grid">
+      <div class="evidence-frame" id="evidence1">Sample Evidence Frame<br>CAM-01 Snapshot</div>
+      <div class="evidence-frame alt" id="evidence2">Sample Evidence Frame 2<br>CAM-02 Snapshot</div>
+    </div>
+
+    <p class="footer">
+      This is a system-generated e-challan issued under the AI-based traffic enforcement program.
+      Payment must be made within 15 days of issue to avoid additional penalty. This document does not
+      require a physical signature.
+    </p>
+
+  </div>
+
+  <script>
+    // ---------------------------------------------------------------
+    // Fill this in with real data (e.g. after fetching a challan from
+    // your backend) and call renderChallan(data) to populate the page.
+    // Leave image URLs empty/omit to keep the placeholder frame look.
+    // ---------------------------------------------------------------
+    const VIOLATION_RULES = {
+      NO_HELMET:     { label: "No Helmet",       fine: 1000, section: "Section 129 r/w 194D, Motor Vehicles Act" },
+      TRIPLE_RIDING: { label: "Triple Riding",   fine: 1000, section: "Section 128 r/w 194C, Motor Vehicles Act" },
+      WRONG_WAY:     { label: "Wrong Direction", fine: 5000, section: "Section 184, Motor Vehicles Act" },
+      OVER_SPEEDING: { label: "Over Speeding",   fine: 2000, section: "Section 183, Motor Vehicles Act" },
+    };
+
+    function formatDateTime(value) {
+      const d = value instanceof Date ? value : new Date(value);
+      if (isNaN(d.getTime())) return String(value);
+      return d.toLocaleString("en-IN", {
+        day: "2-digit", month: "short", year: "numeric",
+        hour: "2-digit", minute: "2-digit", hour12: true,
+      });
+    }
+
+    function renderChallan(data) {
+      const rule = VIOLATION_RULES[data.violationType];
+      const set = (field, val) => {
+        const el = document.querySelector(`[data-field="${field}"]`);
+        if (el) el.textContent = val;
+      };
+
+      set("challanId", data.challanId || "-");
+      set("issueDate", formatDateTime(new Date()));
+      set("plateNumber", data.plateNumber || "-");
+      set("violationType", rule ? rule.label : data.violationType);
+      set("location", data.location || "-");
+      set("cameraId", data.cameraId || "-");
+      set("timing", formatDateTime(data.timing));
+      set("legalSection", rule ? rule.section : "-");
+      set("fineAmount", rule ? `Rs. ${rule.fine.toLocaleString("en-IN")}` : "-");
+
+      // Evidence images: pass data.imagePaths = ["url1.jpg", "url2.jpg"]
+      const frames = [document.getElementById("evidence1"), document.getElementById("evidence2")];
+      (data.imagePaths || []).forEach((src, i) => {
+        if (src && frames[i]) {
+          frames[i].innerHTML = `<img src="${src}" alt="Evidence photo ${i + 1}">`;
+        }
+      });
+    }
+
+    // ---------------------------------------------------------------
+    // The control room opens this page with the record in the query
+    // string, so the challan is a document you review and print — it is
+    // never dispatched straight from the dashboard.
+    // ---------------------------------------------------------------
+    (function fromQuery() {
+      const q = new URLSearchParams(location.search);
+      if (![...q.keys()].length) return;          // opened directly: keep sample
+      const imgs = (q.get("images") || "").split(",").filter(Boolean);
+      renderChallan({
+        challanId:     q.get("challanId"),
+        violationType: q.get("violationType"),
+        location:      q.get("location"),
+        timing:        q.get("timing"),
+        plateNumber:   q.get("plateNumber"),
+        cameraId:      q.get("cameraId"),
+        imagePaths:    imgs,
+      });
+      set("sourceVideo", q.get("source") || "\u2014");
+      set("captured", q.get("captured") ? formatDateTime(q.get("captured")) : "\u2014");
+      const note = q.get("note");
+      if (note) {
+        const fine = document.querySelector(".fine-row");
+        if (fine) {
+          const p = document.createElement("div");
+          p.style.cssText = "font-size:9px;color:#777;margin-top:6px;line-height:1.5;";
+          p.textContent = note;
+          fine.appendChild(p);
+        }
+      }
+      const sp = q.get("speed");
+      if (sp) {
+        const el = document.querySelector('[data-field="violationType"]');
+        if (el) el.textContent += `  ·  ${sp} km/h`;
+      }
+      // one evidence frame supplied: let it use the full width
+      if (imgs.length === 1) {
+        const f2 = document.getElementById("evidence2");
+        if (f2) f2.remove();
+      }
+    })();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,93 @@
+{
+  "cameras": [
+    {
+      "id": "CAM-01",
+      "location": "Round-about",
+      "city": "Greater Noida",
+      "video": "media/videos/cam01.mp4",
+      "duration": 17.5,
+      "source_video": "Round_about.MOV",
+      "captured_at": "2026-08-17T13:18:37+05:30"
+    },
+    {
+      "id": "CAM-02",
+      "location": "KP2 - Metro",
+      "city": "Greater Noida",
+      "video": "media/videos/cam02.mp4",
+      "duration": 18.2,
+      "source_video": "KP2_metro.MOV",
+      "captured_at": "2026-08-17T10:54:37+05:30"
+    },
+    {
+      "id": "CAM-03",
+      "location": "Metro Merger",
+      "city": "Greater Noida",
+      "video": "media/videos/cam03.mp4",
+      "duration": 23.4,
+      "source_video": "Merge_Metro.mov",
+      "captured_at": "2026-08-17T11:17:29+05:30"
+    },
+    {
+      "id": "CAM-04",
+      "location": "Metro Lane",
+      "city": "Greater Noida",
+      "video": "media/videos/cam04.mp4",
+      "duration": 15.8,
+      "source_video": "Metro_lane.mov",
+      "captured_at": "2026-08-17T10:56:03+05:30"
+    },
+    {
+      "id": "CAM-05",
+      "location": "Pari Chowk",
+      "city": "Greater Noida",
+      "video": "media/videos/cam05.mp4",
+      "duration": 21.1,
+      "source_video": "Pari_chawk.mov",
+      "captured_at": "2026-08-17T10:59:33+05:30"
+    },
+    {
+      "id": "CAM-06",
+      "location": "Expo Mart",
+      "city": "Greater Noida",
+      "video": "media/videos/cam06.mp4",
+      "duration": 26.0,
+      "source_video": "Expo.MOV",
+      "captured_at": "2026-08-17T13:25:35+05:30"
+    }
+  ],
+  "city": "Greater Noida",
+  "violations": [
+    {
+      "key": "NO_HELMET",
+      "label": "No Helmet",
+      "fine": 1000,
+      "severity": "red",
+      "section": "Section 129 r/w 194D, Motor Vehicles Act",
+      "note": "Applies to rider and pillion. May carry disqualification of licence for up to 3 months."
+    },
+    {
+      "key": "TRIPLE_RIDING",
+      "label": "Triple Riding",
+      "fine": 1000,
+      "severity": "red",
+      "section": "Section 128 r/w 194C, Motor Vehicles Act",
+      "note": "May carry suspension of licence for up to 3 months."
+    },
+    {
+      "key": "WRONG_WAY",
+      "label": "Wrong Direction",
+      "fine": 5000,
+      "severity": "red",
+      "section": "Section 184, Motor Vehicles Act",
+      "note": "Dangerous driving. Rs. 1,000 to Rs. 5,000 subject to court severity."
+    },
+    {
+      "key": "OVER_SPEEDING",
+      "label": "Over Speeding",
+      "fine": 2000,
+      "severity": "amber",
+      "section": "Section 183, Motor Vehicles Act",
+      "note": "Rs. 1,000-2,000 for light motor vehicles; Rs. 2,000-4,000 for medium or heavy passenger and goods vehicles."
+    }
+  ]
+}
