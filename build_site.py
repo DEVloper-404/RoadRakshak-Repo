@@ -50,6 +50,9 @@ The source is the `demo/` folder of the SIH repository. To change what shows:
 
 The GIS · Journey tab reads `journeys.json` (cameras with lat/lng, vehicles with
 their camera hops, clip + time offset). Edit it in `demo/`, rebuild, push.
+
+**Full details — every file, camera settings, adding videos, the GIS data
+format, publishing — are in [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md).**
 """
 
 
@@ -91,6 +94,8 @@ def main() -> int:
         html = html.replace(old, new, 1)
     (HERE / "index.html").write_text(html)
     shutil.copy2(src / "challan.html", HERE / "challan.html")
+    if (src / "DEVELOPER_GUIDE.md").exists():
+        shutil.copy2(src / "DEVELOPER_GUIDE.md", HERE / "DEVELOPER_GUIDE.md")
     shutil.copy2(src / "demo_data.json", HERE / "demo_data.json")
 
     # media

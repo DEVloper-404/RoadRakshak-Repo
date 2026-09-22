@@ -18,3 +18,6 @@ The source is the `demo/` folder of the SIH repository. To change what shows:
 
 The GIS · Journey tab reads `journeys.json` (cameras with lat/lng, vehicles with
 their camera hops, clip + time offset). Edit it in `demo/`, rebuild, push.
+
+**Full details — every file, camera settings, adding videos, the GIS data
+format, publishing — are in [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md).**
