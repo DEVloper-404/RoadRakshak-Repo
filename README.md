@@ -15,3 +15,6 @@ The source is the `demo/` folder of the SIH repository. To change what shows:
    `<PLATE>__<VIOLATION>__<CAMERA>__<VEHICLE>.jpg`
 2. `python build_site.py` here (copies files, rewrites `violations.json`)
 3. `git add -A && git commit -m "update demo" && git push`
+
+The GIS · Journey tab reads `journeys.json` (cameras with lat/lng, vehicles with
+their camera hops, clip + time offset). Edit it in `demo/`, rebuild, push.

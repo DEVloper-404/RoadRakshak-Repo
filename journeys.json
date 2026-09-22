@@ -1,0 +1,130 @@
+{
+  "_note": "Sample journeys for the GIS demo. Edit freely: cameras (lat/lng), vehicles, hops. Times are ISO with +05:30. 'at' = second in the clip where the vehicle appears; 'dwell' = seconds it stays in view (default 5).",
+  "cameras": [
+    {
+      "id": "CAM-01",
+      "name": "Round-about",
+      "lat": 28.4744,
+      "lng": 77.504
+    },
+    {
+      "id": "CAM-02",
+      "name": "KP2 – Metro",
+      "lat": 28.4632,
+      "lng": 77.4948
+    },
+    {
+      "id": "CAM-03",
+      "name": "Metro Merger",
+      "lat": 28.46,
+      "lng": 77.5
+    },
+    {
+      "id": "CAM-04",
+      "name": "Metro Lane",
+      "lat": 28.4665,
+      "lng": 77.4985
+    },
+    {
+      "id": "CAM-05",
+      "name": "Pari Chowk",
+      "lat": 28.4655,
+      "lng": 77.504
+    },
+    {
+      "id": "CAM-06",
+      "name": "Expo Mart",
+      "lat": 28.469,
+      "lng": 77.5
+    }
+  ],
+  "vehicles": [
+    {
+      "plate": "UP16BX4521",
+      "type": "Car",
+      "colour": "White",
+      "photo": "journeys/UP16BX4521.jpg",
+      "hops": [
+        {
+          "camera": "CAM-02",
+          "time": "2026-09-14T10:14:05+05:30",
+          "video": "media/videos/cam02.mp4",
+          "at": 6.5,
+          "dwell": 4
+        },
+        {
+          "camera": "CAM-04",
+          "time": "2026-09-14T10:14:58+05:30",
+          "video": "media/videos/cam04.mp4",
+          "at": 3.0,
+          "dwell": 5
+        },
+        {
+          "camera": "CAM-05",
+          "time": "2026-09-14T10:16:05+05:30",
+          "video": "media/videos/cam05.mp4",
+          "at": 9.0,
+          "dwell": 5
+        }
+      ]
+    },
+    {
+      "plate": "DL8CAF9032",
+      "type": "Heavy Vehicle",
+      "colour": "Orange",
+      "photo": "journeys/DL8CAF9032.jpg",
+      "hops": [
+        {
+          "camera": "CAM-01",
+          "time": "2026-09-14T09:52:10+05:30",
+          "video": "media/videos/cam01.mp4",
+          "at": 4.0,
+          "dwell": 5
+        },
+        {
+          "camera": "CAM-02",
+          "time": "2026-09-14T09:54:40+05:30",
+          "video": "media/videos/cam02.mp4",
+          "at": 6.5,
+          "dwell": 4
+        },
+        {
+          "camera": "CAM-06",
+          "time": "2026-09-14T09:56:00+05:30",
+          "video": "media/videos/cam06.mp4",
+          "at": 5.0,
+          "dwell": 5
+        },
+        {
+          "camera": "CAM-05",
+          "time": "2026-09-14T09:57:00+05:30",
+          "video": "media/videos/cam05.mp4",
+          "at": 2.0,
+          "dwell": 5
+        }
+      ]
+    },
+    {
+      "plate": "HR26DQ5510",
+      "type": "Car",
+      "colour": "White",
+      "photo": "journeys/HR26DQ5510.jpg",
+      "hops": [
+        {
+          "camera": "CAM-03",
+          "time": "2026-09-14T11:40:15+05:30",
+          "video": "media/videos/cam03.mp4",
+          "at": 4.0,
+          "dwell": 5
+        },
+        {
+          "camera": "CAM-05",
+          "time": "2026-09-14T11:41:30+05:30",
+          "video": "media/videos/cam05.mp4",
+          "at": 9.1,
+          "dwell": 5
+        }
+      ]
+    }
+  ]
+}

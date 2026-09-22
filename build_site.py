@@ -47,6 +47,9 @@ The source is the `demo/` folder of the SIH repository. To change what shows:
    `<PLATE>__<VIOLATION>__<CAMERA>__<VEHICLE>.jpg`
 2. `python build_site.py` here (copies files, rewrites `violations.json`)
 3. `git add -A && git commit -m "update demo" && git push`
+
+The GIS · Journey tab reads `journeys.json` (cameras with lat/lng, vehicles with
+their camera hops, clip + time offset). Edit it in `demo/`, rebuild, push.
 """
 
 
@@ -104,6 +107,27 @@ def main() -> int:
     for n in names:
         shutil.copy2(src / "violation" / n, vdir / n)
     (HERE / "violations.json").write_text(json.dumps({"files": names}, indent=2))
+
+    # GIS · journey: hand-edited json, vehicle photos, and any extra clips it references
+    jpath = src / "journeys.json"
+    if jpath.exists():
+        shutil.copy2(jpath, HERE / "journeys.json")
+        j = json.loads(jpath.read_text())
+        jdir = HERE / "journeys"; jdir.mkdir(exist_ok=True)
+        for old in jdir.glob("*"):
+            if old.suffix.lower() in IMG_EXT: old.unlink()
+        for v in j.get("vehicles", []):
+            photo = src / v.get("photo", "")
+            if v.get("photo") and photo.exists():
+                (HERE / v["photo"]).parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(photo, HERE / v["photo"])
+            for h in v.get("hops", []):
+                clip = src / h.get("video", "")
+                if h.get("video") and clip.exists() and not (HERE / h["video"]).exists():
+                    if clip.stat().st_size > FILE_LIMIT:
+                        sys.exit(f"{clip.name}: exceeds GitHub's 100 MB file limit")
+                    (HERE / h["video"]).parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(clip, HERE / h["video"])
 
     (HERE / ".nojekyll").write_text("")
     (HERE / "README.md").write_text(NOTE_README)

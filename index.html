@@ -1,6 +1,7 @@
 <!doctype html><html lang=en><head><meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1">
 <title>RoadRakshak — Traffic Control Room</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
 :root{
  --bg:#0a0d13; --pane:#121721; --pane2:#182030; --line:#232d3f; --line2:#2e3a4e;
@@ -195,6 +196,68 @@ tbody tr:hover td{background:#161e2c}
 .tst.warn{border-left-color:var(--amber)}
 @keyframes pop{from{opacity:0;transform:translateX(24px)}}
 .empty{padding:44px;text-align:center;color:var(--dim);font:13px var(--mono)}
+
+/* ── GIS · journey ───────────────────────────────────── */
+.gis{display:grid;grid-template-columns:1.45fr 1fr;gap:16px;align-items:start}
+@media(max-width:1100px){.gis{grid-template-columns:1fr}}
+#gmap{height:560px;border-radius:10px;border:1px solid var(--line);background:#0d1119;overflow:hidden;position:relative}
+#gmap .leaflet-tile-pane{filter:invert(1) hue-rotate(190deg) brightness(.82) contrast(1.05) saturate(.45)}
+#gmap .leaflet-control-attribution{background:rgba(10,13,19,.8);color:var(--dim);font:10px var(--mono)}
+#gmap .leaflet-control-attribution a{color:var(--mut)}
+#gmap .leaflet-bar a{background:var(--pane2);color:var(--fg);border-color:var(--line2)}
+.cpin{background:var(--pane2);color:var(--mut);border:1px solid var(--line2);border-radius:14px;
+ padding:3px 9px;font:700 10px/1.3 var(--mono);white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.6);
+ transform:translate(-50%,-50%);display:inline-block;cursor:pointer;letter-spacing:.05em}
+.cpin.on{background:var(--amber);color:#17181a;border-color:var(--amber)}
+.cpin.dim{opacity:.55}
+.cpin.pulse{animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(240,162,50,.7)}50%{box-shadow:0 0 0 12px rgba(240,162,50,0)}}
+.cpin b{display:inline-block;background:#17181a;color:var(--amber);border-radius:50%;width:15px;height:15px;
+ line-height:15px;text-align:center;margin-right:5px;font-size:9px}
+.vmark{width:22px;height:22px;border-radius:50%;background:var(--cyan);border:3px solid #fff;
+ box-shadow:0 0 0 4px rgba(49,208,214,.35);transform:translate(-50%,-50%)}
+.leaflet-div-icon{background:none;border:0}
+.mask{z-index:2000}
+#toast{z-index:2100}
+.gsearch{display:grid;grid-template-columns:1.2fr 1fr .8fr .8fr 1fr auto auto;gap:9px;margin-bottom:12px}
+@media(max-width:1100px){.gsearch{grid-template-columns:1fr 1fr 1fr}}
+.gchips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:13px;align-items:center}
+.gchips .lbl{font:10px var(--mono);letter-spacing:.1em;color:var(--dim);text-transform:uppercase;margin-right:3px}
+.gchip{background:var(--pane2);border:1px solid var(--line2);border-radius:7px;padding:5px 10px;
+ font:700 12px var(--mono);letter-spacing:.08em;cursor:pointer;color:var(--fg)}
+.gchip:hover,.gchip.on{border-color:var(--amber);color:var(--amber)}
+.vres{display:flex;gap:11px;padding:10px 13px;border-bottom:1px solid var(--line);cursor:pointer;align-items:center}
+.vres:hover,.vres.on{background:var(--pane2)}
+.vres img{width:84px;height:56px;object-fit:cover;border-radius:5px;background:#000;flex:0 0 auto}
+.vres .qs{font:11px var(--mono);color:var(--mut);margin-top:3px}
+.vcard{padding:14px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:150px 1fr;gap:14px;align-items:center}
+.vcard img{width:150px;height:110px;object-fit:cover;border-radius:8px;background:#000;border:1px solid var(--line2)}
+.vcard .qs{font:11px var(--mono);color:var(--mut);margin-top:6px;line-height:1.7}
+.hops{max-height:420px;overflow-y:auto}
+.hop{display:grid;grid-template-columns:28px 1fr auto;gap:10px;padding:10px 13px;border-bottom:1px solid var(--line);
+ cursor:pointer;align-items:center;transition:.15s}
+.hop:hover{background:var(--pane2)}
+.hop.on{background:rgba(240,162,50,.09);box-shadow:inset 3px 0 0 var(--amber)}
+.hop.off{opacity:.42}
+.hop .n{width:24px;height:24px;border-radius:50%;background:var(--amber);color:#17181a;font:700 12px/24px var(--mono);text-align:center}
+.hop .c{font:700 12px var(--mono)}
+.hop .s{font:11px var(--mono);color:var(--mut);margin-top:2px}
+.hop .g{font:10px var(--mono);color:var(--dim);text-align:right;line-height:1.6}
+.hop .g em{color:var(--cyan);font-style:normal}
+.hop .g em.hot{color:var(--red)}
+.gacts{display:flex;gap:8px;padding:11px 13px;border-top:1px solid var(--line);flex-wrap:wrap}
+.player{position:relative;background:#000;border-radius:8px;overflow:hidden}
+.player video{width:100%;max-height:60vh;display:block}
+.player .ring{position:absolute;border:3px solid var(--amber);border-radius:10px;
+ box-shadow:0 0 0 3px rgba(240,162,50,.3),0 0 22px rgba(240,162,50,.55);display:none;pointer-events:none}
+.player .ring.on{display:block;animation:pulse 1s ease-in-out infinite}
+.player .cap{position:absolute;left:10px;bottom:10px;background:rgba(6,8,12,.82);border:1px solid var(--line2);
+ border-radius:6px;padding:5px 9px;font:600 11px var(--mono);letter-spacing:.06em}
+.player .lbl{position:absolute;right:10px;top:10px;background:var(--amber);color:#17181a;border-radius:6px;
+ padding:4px 9px;font:700 11px var(--mono);display:none}
+.player .lbl.on{display:block}
+#gmap svg.schem{width:100%;height:100%;display:block}
+
 </style></head><body>
 
 <header>
@@ -205,6 +268,7 @@ tbody tr:hover td{background:#161e2c}
     <button data-p=det>Detections<span class=pill id=pDet>0</span></button>
     <button data-p=vio>Violations</button>
     <button data-p=ana>Analytics</button>
+    <button data-p=gis>GIS · Journey</button>
   </nav>
   <div class=spacer></div>
   <div class=clock id=clk>--:--:--</div>
@@ -280,11 +344,34 @@ tbody tr:hover td{background:#161e2c}
       </div>
     </div>
   </section>
+  <!-- ══ GIS · JOURNEY ══ -->
+  <section class=page id=p-gis>
+    <div class=ttl><h2>GIS · Vehicle Journey</h2>
+      <span class=sub>search a vehicle across cameras — trajectory on the map, footage at each camera</span></div>
+    <div class=gsearch>
+      <input class=f id=gPlate placeholder="number plate (full or part)" autocomplete=off>
+      <input class=f id=gDate type=date>
+      <input class=f id=gFrom type=time>
+      <input class=f id=gTo type=time>
+      <select class=f id=gCam><option value="">Any camera</option></select>
+      <button class="btn pri" onclick="gisSearch()">Search</button>
+      <button class=btn onclick="gisReset()">Reset</button>
+    </div>
+    <div class=gchips id=gChips></div>
+    <div class=gis>
+      <div id=gmap></div>
+      <div class=card>
+        <div class=card-hd id=gHd>Vehicles</div>
+        <div id=gPanel><div class=empty>Loading journeys…</div></div>
+      </div>
+    </div>
+  </section>
 </main>
 
 <div class=mask id=mask><div class=modal id=modal></div></div>
 <div id=toast></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 const S=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -586,7 +673,7 @@ function openRec(id){
     </div>`;
   S('mask').classList.add('on');
 }
-function closeM(){S('mask').classList.remove('on');}
+function closeM(){S('mask').classList.remove('on');S('modal').querySelectorAll('video').forEach(v=>v.pause());gisStopReplay();}
 S('mask').addEventListener('click',e=>{if(e.target===S('mask'))closeM();});
 addEventListener('keydown',e=>{if(e.key==='Escape')closeM();});
 
@@ -662,6 +749,253 @@ function renderAna(){
       <div class=n>${v}</div></div>`).join('')||'<div class=empty>No data yet</div>';
 }
 
+// ── GIS · vehicle journey ─────────────────────────────
+/* Data: journeys.json (cameras with lat/lng, vehicles with time-ordered hops).
+   Map: Leaflet + OpenStreetMap when the CDN is reachable, else an inline SVG
+   schematic with the same pins and route, so the demo never shows a blank box. */
+const GIS={cams:[],vehicles:[],map:null,pins:{},route:null,vm:null,sel:null,hits:null,replay:null,schem:false};
+const TZ='Asia/Kolkata';
+const gDate=t=>new Date(t).toLocaleDateString('en-CA',{timeZone:TZ});
+const gTime=t=>new Date(t).toLocaleTimeString('en-GB',{timeZone:TZ,hour:'2-digit',minute:'2-digit',second:'2-digit'});
+const gHM=t=>gTime(t).slice(0,5);
+const gWhen=t=>new Date(t).toLocaleString('en-IN',{timeZone:TZ,day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true});
+const normP=s=>String(s||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+function camOf(id){return GIS.cams.find(c=>c.id===id)||{id,name:id,lat:28.4665,lng:77.5};}
+function haversine(a,b){const R=6371,r=x=>x*Math.PI/180;const dl=r(b.lat-a.lat),dg=r(b.lng-a.lng);
+  const h=Math.sin(dl/2)**2+Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(dg/2)**2;return 2*R*Math.asin(Math.sqrt(h));}
+const mmss=s=>`${Math.floor(s/60)}m ${String(Math.round(s%60)).padStart(2,'0')}s`;
+
+fetch('journeys.json').then(r=>r.json()).then(j=>{
+  GIS.cams=j.cameras||[];
+  GIS.vehicles=(j.vehicles||[]).map(v=>({...v,hops:[...(v.hops||[])].sort((a,b)=>new Date(a.time)-new Date(b.time))}));
+  S('gCam').innerHTML='<option value="">Any camera</option>'+GIS.cams.map(c=>`<option value="${esc(c.id)}">${esc(c.id)} · ${esc(c.name)}</option>`).join('');
+  S('gChips').innerHTML='<span class=lbl>Recent vehicles</span>'+GIS.vehicles.map(v=>
+    `<span class=gchip onclick="gisPick('${esc(v.plate)}')">${esc(v.plate)}</span>`).join('');
+  gisRenderList(GIS.vehicles.map(v=>({v,hops:v.hops})));
+  if(S('p-gis').classList.contains('on')) gisShow();
+}).catch(()=>{S('gPanel').innerHTML='<div class=empty>journeys.json missing</div>';});
+
+function gisShow(){
+  if(!GIS.map && !GIS.schem) gisInitMap();
+  else if(GIS.map) setTimeout(()=>GIS.map.invalidateSize(),60);
+}
+
+// ── map (Leaflet, or SVG schematic when offline) ──────
+function gisInitMap(){
+  const el=S('gmap');
+  if(typeof L==='undefined'){ GIS.schem=true; gisSchematic(); return; }
+  const m=L.map(el,{zoomControl:true,attributionControl:true}).setView([28.4665,77.5],15);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(m);
+  GIS.map=m;
+  GIS.cams.forEach(c=>{
+    const mk=L.marker([c.lat,c.lng],{icon:pinIcon(c),zIndexOffset:10}).addTo(m);
+    mk.bindTooltip(`${esc(c.name)} · ${gisSeenAt(c.id)} vehicle(s) on record`,{direction:'top',offset:[0,-14]});
+    mk.on('click',()=>gisPinClick(c.id));
+    GIS.pins[c.id]=mk;
+  });
+  // the tab was display:none until now: size the map first, then fit the pins
+  setTimeout(()=>{ m.invalidateSize(); if(GIS.cams.length) m.fitBounds(GIS.cams.map(c=>[c.lat,c.lng]),{padding:[40,40]}); },80);
+}
+function pinIcon(c,step,state){
+  const cls='cpin'+(state==='on'?' on':state==='dim'?' dim':state==='pulse'?' on pulse':'');
+  return L.divIcon({className:'',html:`<div class="${cls}">${step?`<b>${step}</b>`:''}${esc(c.id)}</div>`,iconSize:[0,0]});
+}
+function gisSeenAt(camId){return GIS.vehicles.filter(v=>v.hops.some(h=>h.camera===camId)).length;}
+function gisPinClick(camId){
+  if(GIS.sel){ const i=GIS.sel.hops.findIndex(h=>h.camera===camId); if(i>=0){gisOpenHop(i);return;} }
+  S('gCam').value=camId; gisSearch();          // nothing selected: who passed this camera?
+}
+function gisSetPins(activeHops){
+  const step={}; (activeHops||[]).forEach((h,i)=>step[h.camera]=i+1);
+  if(GIS.map) GIS.cams.forEach(c=>GIS.pins[c.id].setIcon(pinIcon(c,step[c.id],activeHops?(step[c.id]?'on':'dim'):'')));
+  if(GIS.schem) gisSchematic(activeHops);
+}
+function gisDrawRoute(hops){
+  if(GIS.map){
+    if(GIS.route){GIS.route.remove();GIS.route=null;}
+    const pts=hops.map(h=>{const c=camOf(h.camera);return [c.lat,c.lng];});
+    if(pts.length>1) GIS.route=L.polyline(pts,{color:'#f0a232',weight:4,opacity:.9,dashArray:'2 8',lineCap:'round'}).addTo(GIS.map);
+    if(pts.length) GIS.map.fitBounds(pts,{padding:[70,70],maxZoom:16});
+  }
+  gisSetPins(hops);
+}
+function gisSchematic(activeHops){
+  const el=S('gmap'); if(!GIS.cams.length){el.innerHTML='<div class=empty>no cameras</div>';return;}
+  const W=el.clientWidth||800,H=el.clientHeight||560,P=70;
+  const la=GIS.cams.map(c=>c.lat),lg=GIS.cams.map(c=>c.lng);
+  const x=c=>P+(c.lng-Math.min(...lg))/((Math.max(...lg)-Math.min(...lg))||1)*(W-2*P);
+  const y=c=>H-P-(c.lat-Math.min(...la))/((Math.max(...la)-Math.min(...la))||1)*(H-2*P);
+  const step={}; (activeHops||[]).forEach((h,i)=>step[h.camera]=i+1);
+  const route=(activeHops||[]).map(h=>camOf(h.camera)).map(c=>`${x(c)},${y(c)}`).join(' ');
+  const F='ui-monospace,Menlo,monospace';
+  el.innerHTML=`<svg class=schem viewBox="0 0 ${W} ${H}">
+    <defs><pattern id=gr width=40 height=40 patternUnits=userSpaceOnUse><path d="M40 0H0V40" fill=none stroke="#1b2331" stroke-width=1/></pattern></defs>
+    <rect width=${W} height=${H} fill="url(#gr)"/>
+    <text x=16 y=26 fill="#5d6d85" font-family="${F}" font-size=11>SCHEMATIC · map tiles unavailable offline</text>
+    ${route?`<polyline points="${route}" fill=none stroke="#f0a232" stroke-width=4 stroke-dasharray="2 9" stroke-linecap="round"/>`:''}
+    ${GIS.cams.map(c=>`<g style="cursor:pointer" onclick="gisPinClick('${esc(c.id)}')">
+      <circle cx=${x(c)} cy=${y(c)} r=${step[c.id]?13:9} fill="${step[c.id]?'#f0a232':'#182030'}" stroke="${step[c.id]?'#f0a232':'#2e3a4e'}" stroke-width=2 opacity="${activeHops&&!step[c.id]?.5:1}"/>
+      ${step[c.id]?`<text x=${x(c)} y=${y(c)+4} text-anchor=middle fill="#17181a" font-family="${F}" font-size=11 font-weight=700>${step[c.id]}</text>`:''}
+      <text x=${x(c)} y=${y(c)-18} text-anchor=middle fill="${step[c.id]?'#f7c274':'#8496b0'}" font-family="${F}" font-size=11 font-weight=700>${esc(c.id)}</text>
+      <text x=${x(c)} y=${y(c)+28} text-anchor=middle fill="#5d6d85" font-family="${F}" font-size=10>${esc(c.name)}</text></g>`).join('')}
+  </svg>`;
+}
+
+// ── search ────────────────────────────────────────────
+function gisSearch(){
+  const q=normP(S('gPlate').value), d=S('gDate').value, f=S('gFrom').value, t=S('gTo').value, cam=S('gCam').value;
+  const hopOk=h=>(!d||gDate(h.time)===d)&&(!f||gHM(h.time)>=f)&&(!t||gHM(h.time)<=t)&&(!cam||h.camera===cam);
+  const hits=GIS.vehicles.filter(v=>!q||normP(v.plate).includes(q))
+    .map(v=>({v,hops:v.hops.filter(hopOk)})).filter(x=>x.hops.length);
+  const filtered=!!(d||f||t||cam);
+  GIS.hits=filtered?hits:null;
+  if(hits.length===1){ gisSelect(hits[0].v,filtered?hits[0].hops:null); return; }
+  GIS.sel=null; if(GIS.map&&GIS.route){GIS.route.remove();GIS.route=null;} gisSetPins(null);
+  S('gHd').textContent=hits.length?`${hits.length} vehicle(s) match`:'No match';
+  gisRenderList(hits);
+  if(!hits.length) S('gPanel').innerHTML='<div class=empty>No vehicle matches that search</div>';
+}
+function gisReset(){
+  ['gPlate','gDate','gFrom','gTo','gCam'].forEach(id=>S(id).value='');
+  GIS.sel=null;GIS.hits=null; if(GIS.map&&GIS.route){GIS.route.remove();GIS.route=null;}
+  gisSetPins(null); if(GIS.map&&GIS.cams.length) GIS.map.fitBounds(GIS.cams.map(c=>[c.lat,c.lng]),{padding:[40,40]});
+  S('gHd').textContent='Vehicles'; gisRenderList(GIS.vehicles.map(v=>({v,hops:v.hops})));
+  document.querySelectorAll('.gchip').forEach(c=>c.classList.remove('on'));
+}
+function gisPick(plate){ gisReset(); S('gPlate').value=plate; gisSearch(); }
+function gisRenderList(items){
+  S('gPanel').innerHTML=items.map(({v,hops})=>`
+    <div class=vres onclick="gisSelectPlate('${esc(v.plate)}')">
+      <img src="${esc(v.photo)}" alt="">
+      <div style="min-width:0;flex:1">
+        <span class=plate>${esc(v.plate)}</span>
+        <div class=qs>${esc(v.type)} · ${esc(v.colour||'')} · ${hops.length} camera${hops.length>1?'s':''}
+          · ${gWhen(hops[0].time)} → ${gTime(hops[hops.length-1].time)}</div>
+      </div>
+      <div class=mono style="font-size:11px;color:var(--dim)">${hops.map(h=>esc(h.camera.replace('CAM-',''))).join(' → ')}</div>
+    </div>`).join('');
+}
+function gisSelectPlate(plate){
+  const hit=GIS.hits&&GIS.hits.find(x=>x.v.plate===plate);
+  const v=GIS.vehicles.find(x=>x.plate===plate); if(v) gisSelect(v,hit?hit.hops:null);
+}
+
+// ── journey view ──────────────────────────────────────
+function gisSelect(v,matched){
+  GIS.sel=v; const on=new Set((matched||v.hops).map(h=>h.time));
+  document.querySelectorAll('.gchip').forEach(c=>c.classList.toggle('on',c.textContent===v.plate));
+  gisDrawRoute(v.hops);
+  S('gHd').textContent=`Journey · ${v.hops.length} camera${v.hops.length>1?'s':''}`;
+  const first=v.hops[0],last=v.hops[v.hops.length-1];
+  let rows='';
+  v.hops.forEach((h,i)=>{
+    const c=camOf(h.camera); let g='first sighting';
+    if(i){ const p=v.hops[i-1],pc=camOf(p.camera); const dt=(new Date(h.time)-new Date(p.time))/1000; const km=haversine(pc,c);
+      const kmh=dt>0?km/(dt/3600):0; g=`+${mmss(dt)} · ${km.toFixed(1)} km<br><em class="${kmh>60?'hot':''}">~${kmh.toFixed(0)} km/h</em>`; }
+    rows+=`<div class="hop${on.has(h.time)?'':' off'}" id="hop${i}" onclick="gisOpenHop(${i})">
+      <div class=n>${i+1}</div>
+      <div><div class=c>${esc(h.camera)} · ${esc(c.name)}</div><div class=s>${gWhen(h.time)}</div></div>
+      <div class=g>${g}</div></div>`;
+  });
+  S('gPanel').innerHTML=`
+    <div class=vcard>
+      <img src="${esc(v.photo)}" alt="${esc(v.plate)}">
+      <div><span class=plate>${esc(v.plate)}</span>
+        <div class=qs>${esc(v.type)} · ${esc(v.colour||'')}<br>
+        ${gDate(first.time)} · ${gTime(first.time)} → ${gTime(last.time)}<br>
+        ${matched?`<span style="color:var(--amber)">${matched.length} of ${v.hops.length} sightings in the searched window</span>`:`${v.hops.length} sightings`}</div></div>
+    </div>
+    <div class=hops>${rows}</div>
+    <div class=gacts>
+      <button class="btn pri" onclick="gisReplay()">▶ Replay journey</button>
+      <button class=btn onclick="gisOpenHop(0)">First sighting</button>
+      <button class=btn onclick="gisReset()">Clear</button>
+    </div>`;
+}
+function gisOpenHop(i,auto){
+  const v=GIS.sel; if(!v||!v.hops[i]) return;
+  const h=v.hops[i],c=camOf(h.camera),dw=h.dwell||5;
+  document.querySelectorAll('.hop').forEach((e,k)=>e.classList.toggle('on',k===i));
+  if(GIS.map){ GIS.map.panTo([c.lat,c.lng]); GIS.pins[h.camera].setIcon(pinIcon(c,i+1,'pulse')); }
+  S('modal').innerHTML=`
+    <div class=modal-hd>
+      <h3>${esc(v.plate)} · ${esc(h.camera)}</h3>
+      <span class="bdg b-amb">sighting ${i+1} of ${v.hops.length}</span>
+      <span class="bdg b-blu">${esc(c.name)}</span>
+      <button class=x onclick="closeM()">&times;</button>
+    </div>
+    <div class=modal-bd>
+      <div class=player>
+        <video id=gv src="${esc(h.video)}" muted playsinline autoplay></video>
+        <div class=ring id=gring style="left:30%;top:30%;width:40%;height:45%"></div>
+        <div class=lbl id=glbl>VEHICLE IN VIEW · ${esc(v.plate)}</div>
+        <div class=cap id=gcap>${esc(h.camera)} · ${gWhen(h.time)}</div>
+      </div>
+      <div class=kv style="margin-top:12px">
+        <div><div class=k>Number plate</div><div class=v><span class=plate>${esc(v.plate)}</span></div></div>
+        <div><div class=k>Camera</div><div class=v>${esc(h.camera)} · ${esc(c.name)}</div></div>
+        <div><div class=k>Passed at</div><div class=v>${gWhen(h.time)}</div></div>
+        <div><div class=k>Clip position</div><div class=v>${fmt(h.at||0)}</div></div>
+      </div>
+      <div class=acts>
+        <button class=btn onclick="gisOpenHop(${i-1})" ${i?'':'disabled'}>‹ Previous camera</button>
+        <button class="btn pri" onclick="gisOpenHop(${i+1})" ${i<v.hops.length-1?'':'disabled'}>Next camera ›</button>
+        <button class=btn onclick="closeM()">Close</button>
+      </div>
+    </div>`;
+  S('mask').classList.add('on');
+  const vid=S('gv'), at=h.at||0;
+  // seek first, play once the seek has landed: calling play() in the same
+  // tick as the seek gets it cancelled by the seek in some browsers
+  const play=()=>vid.play().catch(()=>{});
+  const seek=()=>{ vid.addEventListener('seeked',play,{once:true}); try{vid.currentTime=at;}catch(_){play();} };
+  if(vid.readyState>=1) seek(); else vid.addEventListener('loadedmetadata',seek,{once:true});
+  vid.addEventListener('timeupdate',()=>{
+    const inView=vid.currentTime>=at-0.2&&vid.currentTime<=at+dw;
+    S('gring').classList.toggle('on',inView); S('glbl').classList.toggle('on',inView);
+    S('gcap').textContent=`${h.camera} · ${gWhen(h.time)} · clip ${fmt(vid.currentTime)}`;
+    if(auto&&vid.currentTime>at+dw+0.5) vid.pause();
+  });
+}
+
+// ── replay: walk the hops in order ────────────────────
+function gisReplay(){
+  const v=GIS.sel; if(!v) return;
+  if(GIS.replay) GIS.replay.stop=true;
+  let i=0; const run={stop:false}; GIS.replay=run;
+  const step=async()=>{
+    if(run.stop) return;
+    if(i>=v.hops.length){ GIS.replay=null; closeM(); toast('Journey replay complete'); return; }
+    const h=v.hops[i],c=camOf(h.camera);
+    if(i>0) await gisMoveMarker(camOf(v.hops[i-1].camera),c,1500,run);
+    if(run.stop) return;
+    gisOpenHop(i,true);
+    await new Promise(r=>setTimeout(r,((h.dwell||5)+2)*1000));
+    if(run.stop) return;
+    i++; step();
+  };
+  step();
+}
+function gisMoveMarker(a,b,ms,run){
+  return new Promise(res=>{
+    if(!GIS.map){ setTimeout(res,600); return; }
+    if(!GIS.vm) GIS.vm=L.marker([a.lat,a.lng],{icon:L.divIcon({className:'',html:'<div class=vmark></div>',iconSize:[0,0]}),zIndexOffset:20}).addTo(GIS.map);
+    GIS.vm.setLatLng([a.lat,a.lng]); GIS.map.panTo([(a.lat+b.lat)/2,(a.lng+b.lng)/2]);
+    const t0=performance.now();
+    const tick=()=>{ if(run.stop){res();return;} const k=Math.min(1,(performance.now()-t0)/ms);
+      GIS.vm.setLatLng([a.lat+(b.lat-a.lat)*k,a.lng+(b.lng-a.lng)*k]); k<1?requestAnimationFrame(tick):res(); };
+    tick();
+  });
+}
+/* called from closeM(): a manual close ends the replay; the finished replay
+   closes the modal itself with GIS.replay already null */
+function gisStopReplay(){
+  if(GIS.replay){ GIS.replay.stop=true; GIS.replay=null; }
+  if(GIS.vm){ GIS.vm.remove(); GIS.vm=null; }
+  if(GIS.sel) gisSetPins(GIS.sel.hops);
+}
+S('gPlate').addEventListener('keydown',e=>{if(e.key==='Enter')gisSearch();});
+
 // ── nav + toast ───────────────────────────────────────
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('nav button').forEach(x=>x.classList.remove('on'));
@@ -669,6 +1003,7 @@ document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
   b.classList.add('on'); S('p-'+b.dataset.p).classList.add('on');
   keepPlaying();
   if(b.dataset.p==='ana') renderAna();
+  if(b.dataset.p==='gis') gisShow();
 });
 function toast(msg,kind){
   const d=document.createElement('div');
