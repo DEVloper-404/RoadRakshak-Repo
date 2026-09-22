@@ -30,29 +30,20 @@ PATCHES = [
      '      <span class=sub style="margin-left:auto">Demo · recorded footage · sample records</span></div>'),
 ]
 
-NOTE_README = """# RoadRakshak — demo control room (static site)
+SITE_FOOTER = """
 
-A showcase copy of the RoadRakshak traffic control room, served by GitHub
-Pages. Recorded footage from six camera positions in Greater Noida and a set of
-sample violation records; nothing here is live detection.
+---
 
-Pages: Camera Wall · Detections · Violations (with plate re-entry and a
-printable challan) · Analytics.
+## This copy (GitHub Pages)
 
-## Refreshing the site
+Served at https://devloper-404.github.io/RoadRakshak-Repo/ from the `gh-pages`
+branch. It is generated from the `demo/` folder of the SIH repository — edit
+there, then here:
 
-The source is the `demo/` folder of the SIH repository. To change what shows:
-
-1. Rename or add images in `demo/violation/` — the filename is the record:
-   `<PLATE>__<VIOLATION>__<CAMERA>__<VEHICLE>.jpg`
-2. `python build_site.py` here (copies files, rewrites `violations.json`)
-3. `git add -A && git commit -m "update demo" && git push`
-
-The GIS · Journey tab reads `journeys.json` (cameras with lat/lng, vehicles with
-their camera hops, clip + time offset). Edit it in `demo/`, rebuild, push.
-
-**Full details — every file, camera settings, adding videos, the GIS data
-format, publishing — are in [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md).**
+```bash
+python build_site.py          # copies files, patches index.html, writes violations.json
+git add -A && git commit -m "update demo" && git push site gh-pages
+```
 """
 
 
@@ -135,7 +126,8 @@ def main() -> int:
                     shutil.copy2(clip, HERE / h["video"])
 
     (HERE / ".nojekyll").write_text("")
-    (HERE / "README.md").write_text(NOTE_README)
+    readme = (src / "README.md").read_text() if (src / "README.md").exists() else "# RoadRakshak demo\n"
+    (HERE / "README.md").write_text(readme.rstrip() + SITE_FOOTER)
     (HERE / ".gitignore").write_text(".DS_Store\n")
 
     total = 0

@@ -1,23 +1,63 @@
-# RoadRakshak — demo control room (static site)
+# RoadRakshak — Control Room Demo
 
-A showcase copy of the RoadRakshak traffic control room, served by GitHub
-Pages. Recorded footage from six camera positions in Greater Noida and a set of
-sample violation records; nothing here is live detection.
+Showcase build: recorded clips from six Greater Noida cameras, sample violation
+records, and a GIS vehicle-journey view. No AI, database or backend — it runs
+from a laptop or from GitHub Pages.
 
-Pages: Camera Wall · Detections · Violations (with plate re-entry and a
-printable challan) · Analytics.
+```bash
+.venv/bin/python demo/build_demo.py     # one-time: transcode clips, seed images
+.venv/bin/python demo/serve.py          # http://localhost:8090
+```
 
-## Refreshing the site
+Live copy: https://devloper-404.github.io/RoadRakshak-Repo/
 
-The source is the `demo/` folder of the SIH repository. To change what shows:
+## Pages
 
-1. Rename or add images in `demo/violation/` — the filename is the record:
-   `<PLATE>__<VIOLATION>__<CAMERA>__<VEHICLE>.jpg`
-2. `python build_site.py` here (copies files, rewrites `violations.json`)
-3. `git add -A && git commit -m "update demo" && git push`
+| Page | What it does |
+|---|---|
+| **Camera Wall** | Four feed panels, any of the six cameras (Round-about, KP2 – Metro, Metro Merger, Metro Lane, Pari Chowk, Expo Mart) via the per-panel dropdown. Monitoring only — **no alerts here**. |
+| **Detections** | Latest capture with the vehicle ringed, plate, camera, location; feed of everything prior. Fills as the clips play. |
+| **Violations** | Records table with filters and search. **Re-enter plate** on any row. Click a row for evidence and actions. |
+| **Analytics** | Worst location, totals, fine value, ranked bars by location and violation type. |
+| **GIS · Journey** | Search a vehicle by plate / date / time / camera → its photo, its route across cameras on a real map, and each camera's footage at the moment it passed. **Replay** walks the route camera by camera. |
 
-The GIS · Journey tab reads `journeys.json` (cameras with lat/lng, vehicles with
-their camera hops, clip + time offset). Edit it in `demo/`, rebuild, push.
+## Where the data comes from
 
-**Full details — every file, camera settings, adding videos, the GIS data
-format, publishing — are in [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md).**
+- **Violations** — images in `demo/violation/`, named by plate:
+  `<PLATE>__<VIOLATION>__<CAMERA>__<VEHICLE>.jpg`. Rename a file, reload.
+- **Journeys** — `demo/journeys.json`: camera coordinates, vehicles, and their
+  camera-to-camera hops (clip + the second the vehicle appears). Edit, reload.
+- **Cameras** — `demo/demo_data.json`.
+
+## Challans are generated, not sent
+
+**Generate Challan** opens `challan.html` with the record filled in — a
+printable A4 document an officer reviews and prints or saves as PDF. Nothing is
+dispatched; the record moves to `CHALLAN GENERATED`.
+
+## Violations covered
+
+No Helmet · Triple Riding · Wrong Direction · Over Speeding.
+
+## Publishing
+
+The static site in `roadrakshak-demo/` is built from this folder:
+`python build_site.py` there, commit, `git push site gh-pages`.
+
+## For developers
+
+**[DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md)** — every file, camera settings,
+adding videos, the violation and journey data formats, the GIS tab, publishing.
+
+---
+
+## This copy (GitHub Pages)
+
+Served at https://devloper-404.github.io/RoadRakshak-Repo/ from the `gh-pages`
+branch. It is generated from the `demo/` folder of the SIH repository — edit
+there, then here:
+
+```bash
+python build_site.py          # copies files, patches index.html, writes violations.json
+git add -A && git commit -m "update demo" && git push site gh-pages
+```
