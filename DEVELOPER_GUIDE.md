@@ -199,33 +199,42 @@ camera's footage at the moment it passed.
 
 Tip: distances are straight-line between pins, so pick `time` gaps that give a believable km/h (0.5 km in 50 s ≈ 36 km/h).
 
-### Per-tab feature previews
+### Per-tab feature previews (spotlight)
 
-Each tab has its own short preview, shown over that tab (page blurred, 35 %
-opacity) the first time the tab is opened. All in `index.html`: CSS under
-"first-visit feature tour", markup `#tour`, JS "per-tab feature previews"
-(`TOUR`, `TV`).
+Each tab has its own preview, shown the first time the tab is opened. The
+element that best shows the feature is **spotlighted** — left sharp inside an
+amber ring while four panels around it blur and dim the rest of the screen — a
+pulsing **beacon** marks the exact point, and a line is drawn from the beacon
+to the preview card, which is placed on whichever side has room. All in
+`index.html`: CSS under "first-visit feature tour", markup `#tour`
+(`.tpan` ×4, `.tring`, `.tline`, `.tbeacon`, `.tcard`), JS "per-tab feature
+previews" (`TOUR`, `TV`, `tourLayout()`).
 
-| Tab | Previews |
-|---|---|
-| Camera Wall | Camera Wall (+ "recorded footage and sample records" note) |
-| Detections | Detections · How detections are made (pipeline) |
-| Violations | Violation records · E-challan |
-| Analytics | Analytics |
-| GIS · Journey | GIS journey · Footage at every sighting / replay |
+| Tab | Preview | Spotlight (`target`) | Beacon (`pt`) |
+|---|---|---|---|
+| Camera Wall | Camera Wall | first panel `#cam0` | its camera dropdown |
+| Detections | The violation, as it happens | Most recent capture card | the capture image |
+| Detections | How detections are made | Detection feed card | newest feed item |
+| Violations | Nothing is fined without review | first record row | its **Re-enter plate** button |
+| Violations | E-challan | first row's Challan ID cell | — |
+| Analytics | Where enforcement is needed | Violations by location card | worst location |
+| GIS · Journey | Trace a vehicle | search bar | plate field |
+| GIS · Journey | Footage at every sighting | the map | a camera pin |
 
-- **When**: on a tab's first opening per browser (`localStorage` key
-  `rr_preview_seen_v2_<tab>`, set on Skip or Got it). The landing tab's shows on
-  page load; the others when their nav button is clicked (`tourMaybe()` in the
-  nav handler).
-- **Again**: **ⓘ Preview** header button → current tab (`tourOpen()`);
-  `?tour` in the URL → every tab once more for that visit.
-- **Controls**: Next → / Got it, Skip preview; dots + "N / M · N more" only when
-  a tab has more than one preview; keys → ← Esc.
-- **Editing**: each `TOUR` entry has `tab` (`cams`, `det`, `vio`, `ana`, `gis`),
-  `vis` (key into `TV`, the illustration), `tag`, `title`, `text`, optional
-  `fine`, `pts`. Entries are grouped by `tab` in array order. To show changed
-  previews to everyone again, bump the key to `rr_preview_seen_v3_`.
+- **When**: first opening of a tab per browser (`localStorage`
+  `rr_preview_seen_v2_<tab>`, set on Skip / Got it). Detections and Violations
+  wait for the first violation to fire from the clips (≤ 8 s), so the
+  spotlight never lands on an empty box.
+- **Again**: **ⓘ Preview** → current tab; `?tour` → all tabs once more this visit.
+- **Controls**: Next → / Got it, Skip preview; dots + "N / M · N more" when a
+  tab has more than one preview; keys → ← Esc.
+- **Editing a step** (`TOUR` entry): `tab`, `vis` (illustration key in `TV`),
+  `tag`, `title`, `text`, optional `fine`, `pts`, and for the spotlight
+  `target` / `pt` — lists of CSS selectors or functions returning an element,
+  first visible one wins — and `side` (`right`, `left`, `below`, `above`,
+  preferred; the layout falls back to any side with room, or centres the card
+  at the bottom on small screens). Re-layout happens on resize and scroll.
+- To show changed previews to everyone again, bump the key to `rr_preview_seen_v3_`.
 
 ---
 

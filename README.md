@@ -13,12 +13,13 @@ Live copy: https://devloper-404.github.io/RoadRakshak-Repo/
 
 ## Feature previews
 
-The first time you open each tab, a short preview of **that tab's** features
-appears over it, with the page blurred behind. **Next →** / **Skip preview**;
-tabs with two previews show dots underneath (click to jump, "1 more"). Arrow
-keys and Esc work too. Each tab's preview shows once per browser — the
-**ⓘ Preview** button in the header shows the current tab's again, and `?tour`
-in the URL brings every tab's preview back for that visit.
+The first time you open each tab, a spotlight preview explains **that tab's**
+feature: the part of the screen that shows it best stays sharp inside a
+glowing ring, everything else blurs and dims, a beacon marks the exact spot and
+a line leads from it to the preview card. **Next →** / **Skip preview**; tabs
+with two previews show dots underneath. Arrow keys and Esc work too. Each tab's
+preview shows once per browser — **ⓘ Preview** in the header shows the current
+tab's again, `?tour` in the URL brings them all back for that visit.
 
 ## Pages
 

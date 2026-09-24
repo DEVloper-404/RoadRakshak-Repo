@@ -196,6 +196,7 @@ tbody tr:hover td{background:#161e2c}
 .tst.warn{border-left-color:var(--amber)}
 @keyframes pop{from{opacity:0;transform:translateX(24px)}}
 .empty{padding:44px;text-align:center;color:var(--dim);font:13px var(--mono)}
+img.shot:not([src]){display:none}
 
 /* ── GIS · journey ───────────────────────────────────── */
 .gis{display:grid;grid-template-columns:1.45fr 1fr;gap:16px;align-items:start}
@@ -259,19 +260,33 @@ tbody tr:hover td{background:#161e2c}
 #gmap svg.schem{width:100%;height:100%;display:block}
 /* ── first-visit feature tour ────────────────────────── */
 header,main{transition:filter .45s ease,opacity .45s ease}
-body.touring>header,body.touring>main{filter:blur(5px) saturate(.75);opacity:.35;pointer-events:none;user-select:none}
-.tour{position:fixed;inset:0;z-index:3000;display:none;align-items:center;justify-content:center;padding:22px;
- background:radial-gradient(ellipse at 50% 45%,rgba(10,13,19,.25),rgba(6,8,12,.82))}
-.tour.on{display:flex}
-.tcard{width:min(580px,100%);background:linear-gradient(180deg,#171f2e,#111621);border:1px solid var(--line2);
+.tour{position:fixed;inset:0;z-index:3000;display:none}
+.tour.on{display:block}
+/* four panels around the highlighted element = blur + dim everywhere else */
+.tpan{position:fixed;left:0;top:0;width:0;height:0;background:rgba(6,8,12,.66);
+ backdrop-filter:blur(6px) saturate(.7);-webkit-backdrop-filter:blur(6px) saturate(.7);
+ transition:left .45s cubic-bezier(.2,.8,.2,1),top .45s cubic-bezier(.2,.8,.2,1),width .45s cubic-bezier(.2,.8,.2,1),height .45s cubic-bezier(.2,.8,.2,1)}
+.tring{position:fixed;border:2px solid var(--amber);border-radius:12px;pointer-events:auto;opacity:0;
+ box-shadow:0 0 0 4px rgba(240,162,50,.16),0 0 38px rgba(240,162,50,.32);animation:tglow 2.4s ease-in-out infinite;
+ transition:left .45s cubic-bezier(.2,.8,.2,1),top .45s cubic-bezier(.2,.8,.2,1),width .45s cubic-bezier(.2,.8,.2,1),height .45s cubic-bezier(.2,.8,.2,1),opacity .3s}
+@keyframes tglow{50%{box-shadow:0 0 0 6px rgba(240,162,50,.1),0 0 52px rgba(240,162,50,.45)}}
+.tbeacon{position:fixed;width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;background:var(--amber);
+ border:3px solid #fff;opacity:0;pointer-events:none;animation:beacon 1.6s ease-out infinite;
+ transition:left .45s cubic-bezier(.2,.8,.2,1),top .45s cubic-bezier(.2,.8,.2,1),opacity .3s}
+@keyframes beacon{0%{box-shadow:0 0 0 0 rgba(240,162,50,.7)}100%{box-shadow:0 0 0 22px rgba(240,162,50,0)}}
+.tline{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;opacity:0;transition:opacity .2s}
+.tline path{fill:none;stroke:var(--amber);stroke-width:2.2;stroke-linecap:round;filter:drop-shadow(0 0 4px rgba(240,162,50,.55))}
+.tline circle{fill:var(--amber)}
+.tcard{position:fixed;left:50%;top:50%;width:min(410px,calc(100vw - 32px));transition:left .45s cubic-bezier(.2,.8,.2,1),top .45s cubic-bezier(.2,.8,.2,1),opacity .3s;background:linear-gradient(180deg,#171f2e,#111621);border:1px solid var(--line2);
  border-radius:16px;box-shadow:0 34px 90px rgba(0,0,0,.65),0 0 0 1px rgba(240,162,50,.06);overflow:hidden}
 .tcard.anim{animation:tin .38s cubic-bezier(.2,.8,.2,1)}
 @keyframes tin{from{opacity:0;transform:translateY(16px) scale(.985)}}
-.tvis{height:176px;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--line);
+.tvis{height:150px;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--line);
  background:radial-gradient(ellipse at 50% 120%,rgba(240,162,50,.14),transparent 60%),#0d121b;position:relative;overflow:hidden}
 .tbody{padding:20px 26px 4px}
 .tstep{font:600 10px var(--mono);letter-spacing:.16em;color:var(--amber);text-transform:uppercase}
-.tbody h3{margin:7px 0 8px;font-size:22px;letter-spacing:-.01em}
+.tbody h3{margin:7px 0 8px;font-size:20px;letter-spacing:-.01em}
+.tcard.hide{opacity:0}
 .tbody p{color:#aab7cb;line-height:1.6;margin:0 0 13px;font-size:14px}
 .tbody .fine{font:11px var(--mono);color:var(--dim);margin:-4px 0 12px}
 .tpts{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
@@ -294,8 +309,8 @@ body.touring>header,body.touring>main{filter:blur(5px) saturate(.75);opacity:.35
 .tv-brand{text-align:center;font:800 40px/1 system-ui,-apple-system,sans-serif;letter-spacing:-.02em}
 .tv-brand span{color:var(--amber)}
 .tv-brand small{display:block;margin-top:12px;font:600 11px var(--mono);letter-spacing:.2em;color:var(--mut);text-transform:uppercase}
-.tv-pipe{display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:center;padding:0 16px}
-.tv-pipe div{background:var(--pane2);border:1px solid var(--line2);border-radius:9px;padding:10px 12px;font:700 12px var(--mono);text-align:center}
+.tv-pipe{display:flex;align-items:center;gap:4px;justify-content:center;padding:0 10px}
+.tv-pipe div{background:var(--pane2);border:1px solid var(--line2);border-radius:8px;padding:8px 6px;font:700 10px var(--mono);text-align:center;white-space:nowrap}
 .tv-pipe div b{display:block;color:var(--amber);font-size:10px;margin-bottom:4px}
 .tv-pipe div.hl{border-color:var(--amber);box-shadow:0 0 18px rgba(240,162,50,.25)}
 .tv-pipe i{color:var(--dim);font-style:normal}
@@ -309,16 +324,16 @@ body.touring>header,body.touring>main{filter:blur(5px) saturate(.75);opacity:.35
 .tv-det .car{position:absolute;left:112px;top:50px;width:78px;height:44px;border-radius:12px 12px 6px 6px;background:#c8ced8}
 .tv-det .car:after{content:'';position:absolute;left:12px;right:12px;top:7px;height:13px;border-radius:5px;background:#5a6477}
 .tv-det .ring{position:absolute;left:100px;top:38px;width:102px;height:68px;border:3px solid var(--red);border-radius:6px;animation:pulse 1.4s infinite}
-.tv-det .tag{position:absolute;left:100px;top:14px;font:700 10px var(--mono);color:#ff8d96}
-.tv-rows{display:flex;flex-direction:column;gap:9px;width:330px}
-.tv-rows div{display:flex;align-items:center;justify-content:space-between;background:var(--pane2);border:1px solid var(--line);border-radius:8px;padding:8px 11px}
+.tv-det .tag{position:absolute;left:50%;transform:translateX(-50%);top:12px;font:700 10px var(--mono);color:#ff8d96;white-space:nowrap}
+.tv-rows{display:flex;flex-direction:column;gap:6px;width:330px}
+.tv-rows div{display:flex;align-items:center;justify-content:space-between;background:var(--pane2);border:1px solid var(--line);border-radius:8px;padding:5px 10px}
 .tv-rows em{font:600 10px var(--mono);font-style:normal;color:#f7c274}
 .tv-rows em.gn{color:#79e8bb}
-.tv-doc{width:150px;height:140px;background:#f4f4ee;border-radius:6px;padding:14px;color:#111;box-shadow:0 12px 30px rgba(0,0,0,.5);transform:rotate(-3deg)}
+.tv-doc{width:132px;height:112px;background:#f4f4ee;border-radius:6px;padding:11px 12px;color:#111;box-shadow:0 12px 30px rgba(0,0,0,.5);transform:rotate(-3deg)}
 .tv-doc .h{font:800 11px var(--mono);letter-spacing:.12em;text-align:center;border-bottom:2px solid #111;padding-bottom:6px;margin-bottom:10px}
-.tv-doc .l{height:6px;background:#ccc;border-radius:3px;margin:7px 0}
+.tv-doc .l{height:5px;background:#ccc;border-radius:3px;margin:6px 0}
 .tv-doc .l.s{width:60%}
-.tv-doc .amt{margin-top:12px;font:800 16px var(--mono);color:#b3261e}
+.tv-doc .amt{margin-top:8px;font:800 15px var(--mono);color:#b3261e}
 .tv-bars{display:flex;align-items:flex-end;gap:12px;height:120px}
 .tv-bars i{width:30px;border-radius:5px 5px 0 0;background:linear-gradient(180deg,var(--amber),rgba(240,162,50,.35));animation:grow .8s ease both}
 .tv-bars i:first-child{background:linear-gradient(180deg,var(--red),rgba(255,77,90,.35))}
@@ -445,7 +460,11 @@ body.touring>header,body.touring>main{filter:blur(5px) saturate(.75);opacity:.35
 
 <!-- first-visit feature tour -->
 <div class=tour id=tour role=dialog aria-modal=true aria-label="Feature preview">
-  <div class=tcard id=tcard></div>
+  <div class=tpan id=tp0></div><div class=tpan id=tp1></div><div class=tpan id=tp2></div><div class=tpan id=tp3></div>
+  <div class=tring id=tring></div>
+  <svg class="tline" id="tline"><path id="tpath"></path><circle id="tend" r="4" cx="-10" cy="-10"></circle></svg>
+  <div class=tbeacon id=tbeacon></div>
+  <div class="tcard hide" id=tcard></div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -1103,29 +1122,29 @@ const TV={
         <g transform="translate(150 118)"><rect x=-44 y=-13 width=88 height=26 rx=13 fill="#182030" stroke="#2e3a4e"/><text x=0 y=4 text-anchor=middle font-family="ui-monospace,Menlo,monospace" font-size=11 font-weight=700 fill="#e9eef7">▶ REPLAY</text></g></svg>`,
 };
 const TOUR=[
-  {tab:'cams',vis:'cams',tag:'Camera Wall',title:'Every junction on one screen',
+  {tab:'cams',vis:'cams',target:['#cam0','#wall'],pt:['#cam0 select'],side:'right',tag:'Camera Wall',title:'Every junction on one screen',
    text:'Four panels, any of the six cameras — switch a panel from its dropdown. The wall stays clean: alerts go to Detections, never over the video.',
    fine:'This demo runs on recorded footage from Greater Noida and sample records.',
    pts:['Per-panel camera switch','Timestamped feeds','No alert clutter']},
-  {tab:'det',vis:'det',tag:'Detections',title:'The violation, as it happens',
+  {tab:'det',vis:'det',target:[()=>S('bigShot').closest('.card')],pt:['#bigShot'],side:'right',tag:'Detections',title:'The violation, as it happens',
    text:'Each detection arrives with the vehicle ringed in the frame, the plate that was read, the camera and the time — newest on top, the full feed below.',
    pts:['Evidence frame','Plate · camera · time','Live feed']},
-  {tab:'det',vis:'pipe',tag:'How detections are made',title:'One pipeline, five stages',
+  {tab:'det',vis:'pipe',target:[()=>S('queue').closest('.card')],pt:['#queue .qi'],side:'left',tag:'How detections are made',title:'One pipeline, five stages',
    text:'Every frame goes Detect → Track → Rules → Plate OCR → Evidence. Plates are read only for violators, which keeps the chain light enough for small edge hardware.',
    pts:['YOLO on ONNX Runtime','CPU only — no GPU','Hash-stamped evidence']},
-  {tab:'vio',vis:'vio',tag:'Violation records',title:'Nothing is fined without review',
+  {tab:'vio',vis:'vio',target:['#tb tr:first-child','.tblwrap'],pt:['#tb tr:first-child button','#tb tr:first-child .plate'],side:'below',tag:'Violation records',title:'Nothing is fined without review',
    text:'Every record waits as PENDING for an officer. A plate the AI could not read is routed to manual entry instead of being dropped, and any plate can be corrected.',
    pts:['Filter & search','Re-enter plate','Reject false positives']},
-  {tab:'vio',vis:'challan',tag:'E-challan',title:'Generated, not auto-sent',
+  {tab:'vio',vis:'challan',target:['#tb tr:first-child td:first-child','#p-vio thead th:first-child'],side:'below',tag:'E-challan',title:'Generated, not auto-sent',
    text:'One click fills a printable A4 challan — plate, offence, MV Act section, fine and evidence photos. The officer reviews it, then prints or saves it as PDF.',
    pts:['MV Act sections','Fine filled in','Print / PDF']},
-  {tab:'ana',vis:'bars',tag:'Analytics',title:'Where enforcement is needed',
+  {tab:'ana',vis:'bars',target:[()=>S('byLoc').closest('.card')],pt:['#byLoc > :first-child'],side:'right',tag:'Analytics',title:'Where enforcement is needed',
    text:'Hotspots by location, the violation mix and fine totals, updated as records come in — so patrols go where the violations are.',
    pts:['Worst location','By violation type','Fine totals']},
-  {tab:'gis',vis:'gis',tag:'GIS · Journey',title:'Trace a vehicle across the city',
+  {tab:'gis',vis:'gis',target:['.gsearch'],pt:['#gPlate'],side:'below',tag:'GIS · Journey',title:'Trace a vehicle across the city',
    text:'Search by number plate, date, time window or camera. See the vehicle’s photo and its route across cameras on the map, with the time and speed between each one.',
    pts:['Plate / date / time search','Route on the map','Speed between cameras']},
-  {tab:'gis',vis:'replay',tag:'Footage at every sighting',title:'Jump to the moment it passed',
+  {tab:'gis',vis:'replay',target:['#gmap'],pt:['#gmap .cpin'],side:'right',tag:'Footage at every sighting',title:'Jump to the moment it passed',
    text:'Click any camera on the route to play its clip exactly where the vehicle arrives. Replay walks the whole journey, camera by camera.',
    pts:['Seek to the sighting','Previous / next camera','▶ Replay journey']},
 ];
@@ -1143,9 +1162,23 @@ function tourOpen(tab){
   document.body.classList.add('touring'); S('tour').classList.add('on');
   tourRender();
 }
-function tourMaybe(tab){ if(!pvSeen(tab)) setTimeout(()=>{ if(curTab()===tab&&!S('tour').classList.contains('on')) tourOpen(tab); },250); }
+/* Detections and Violations have nothing to point at until the first
+   violation fires from the clips; wait for it (at most ~8 s). */
+const TREADY={det:()=>LOG.length>0, vio:()=>LOG.length>0};
+function tourMaybe(tab){
+  if(pvSeen(tab)) return;
+  const t0=Date.now();
+  const go=()=>{
+    if(curTab()!==tab||S('tour').classList.contains('on')) return;
+    if(!TREADY[tab]||TREADY[tab]()||Date.now()-t0>8000) setTimeout(()=>{ if(curTab()===tab) tourOpen(tab); }, TREADY[tab]&&Date.now()-t0>350?600:0);
+    else setTimeout(go,400);
+  };
+  setTimeout(go,300);
+}
 function tourClose(){
+  clearTimeout(TL_T);
   document.body.classList.remove('touring'); S('tour').classList.remove('on');
+  S('tcard').classList.add('hide'); S('tring').style.opacity=0; S('tbeacon').style.opacity=0; S('tline').style.opacity=0;
   pvMark(PVTAB);
 }
 function tourGo(i){TI=Math.max(0,Math.min(PV.length-1,i)); tourRender();}
@@ -1171,9 +1204,87 @@ function tourRender(){
       <div class=tdots>${PV.map((s,i)=>`<button class="tdot${i===TI?' on':i<TI?' done':''}" title="${esc(s.tag)}" aria-label="${esc(s.tag)}" onclick="tourGo(${i})"></button>`).join('')}</div>
       <span class=tleft style="text-align:right">${left?`${left} more`:'last one'}</span>
     </div>`:'<div style="height:6px"></div>'}`;
-  c.classList.remove('anim'); void c.offsetWidth; c.classList.add('anim');
-  const nb=c.querySelector('.next'); if(nb) nb.focus({preventScroll:true});
+  tourLayout(true);
 }
+
+/* Spotlight: the step's target stays sharp inside a glowing ring, four panels
+   around it blur and dim the rest, a beacon marks the exact point (pt) and a
+   line runs from it to the card, which sits on the side with room. */
+let TL_T=null;
+function tq(list){
+  for(const q of [].concat(list||[])){
+    const el=typeof q==='function'?q():document.querySelector(q);
+    if(el&&el.getClientRects().length){ const r=el.getBoundingClientRect(); if(r.width>4&&r.height>4) return el; }
+  }
+  return null;
+}
+function tourLayout(animate){
+  const t=PV[TI]; if(!t||!S('tour').classList.contains('on')) return;
+  const vw=innerWidth, vh=innerHeight, M=16, G=74, PAD=8;
+  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+  const card=S('tcard'), ring=S('tring'), bc=S('tbeacon'), svg=S('tline'), path=S('tpath'), end=S('tend');
+  const el=tq(t.target);
+  if(el){ const r0=el.getBoundingClientRect();
+    if(r0.top<66||r0.bottom>vh-M) el.scrollIntoView({block:r0.height>vh*.6?'start':'center'}); }
+  let r=null;
+  if(el){ const q=el.getBoundingClientRect();
+    const x1=clamp(q.left-PAD,6,vw-6), y1=clamp(q.top-PAD,6,vh-6), x2=clamp(q.right+PAD,6,vw-6), y2=clamp(q.bottom+PAD,6,vh-6);
+    if(x2-x1>12&&y2-y1>12) r={x1,y1,x2,y2,w:x2-x1,h:y2-y1}; }
+  const box=(e,x,y,w,h)=>{e.style.left=x+'px';e.style.top=y+'px';e.style.width=Math.max(0,w)+'px';e.style.height=Math.max(0,h)+'px';};
+  const P=[S('tp0'),S('tp1'),S('tp2'),S('tp3')];
+  if(r){ box(P[0],0,0,vw,r.y1); box(P[1],0,r.y2,vw,vh-r.y2); box(P[2],0,r.y1,r.x1,r.h); box(P[3],r.x2,r.y1,vw-r.x2,r.h);
+         box(ring,r.x1,r.y1,r.w,r.h); ring.style.opacity=1; }
+  else { box(P[0],0,0,vw,vh); for(let i=1;i<4;i++) box(P[i],0,0,0,0); ring.style.opacity=0; }
+
+  // measure the card, choose a side with room
+  if(animate){ card.classList.add('hide'); svg.style.opacity=0; }
+  const cw=card.offsetWidth, ch=card.offsetHeight;
+  let side=null;
+  if(r){ const room={right:vw-r.x2,left:r.x1,below:vh-r.y2,above:r.y1};
+    const need=s=>(s==='right'||s==='left')?cw+G+M:ch+G+M;
+    side=[t.side,'right','left','below','above'].filter(Boolean).find(s=>room[s]>=need(s))||null; }
+  let cx,cy;
+  if(side==='right'){cx=r.x2+G; cy=clamp((r.y1+r.y2)/2-ch/2,M,vh-ch-M);}
+  else if(side==='left'){cx=r.x1-G-cw; cy=clamp((r.y1+r.y2)/2-ch/2,M,vh-ch-M);}
+  else if(side==='below'){cy=r.y2+G; cx=clamp((r.x1+r.x2)/2-cw/2,M,vw-cw-M);}
+  else if(side==='above'){cy=r.y1-G-ch; cx=clamp((r.x1+r.x2)/2-cw/2,M,vw-cw-M);}
+  else {cx=(vw-cw)/2; cy=clamp(vh-ch-M-8,M,vh-ch-M);}   // no room: card over the page, bottom centre
+
+  // beacon: the precise point that best shows the feature
+  let bx=null,by=null;
+  if(r){ const pe=tq(t.pt);
+    if(pe){ const q=pe.getBoundingClientRect(); bx=clamp(q.left+q.width/2,r.x1+10,r.x2-10); by=clamp(q.top+q.height/2,r.y1+10,r.y2-10); }
+    else if(side==='right'){ bx=r.x2-2; by=clamp(cy+ch/2,r.y1+14,r.y2-14); }
+    else if(side==='left'){ bx=r.x1+2; by=clamp(cy+ch/2,r.y1+14,r.y2-14); }
+    else if(side==='below'){ by=r.y2-2; bx=clamp(cx+cw/2,r.x1+14,r.x2-14); }
+    else if(side==='above'){ by=r.y1+2; bx=clamp(cx+cw/2,r.x1+14,r.x2-14); }
+    else { bx=(r.x1+r.x2)/2; by=(r.y1+r.y2)/2; } }
+
+  const place=()=>{
+    card.style.left=cx+'px'; card.style.top=cy+'px'; card.classList.remove('hide');
+    if(bx!==null){ bc.style.left=bx+'px'; bc.style.top=by+'px'; bc.style.opacity=1; } else bc.style.opacity=0;
+    if(bx===null||!side){ svg.style.opacity=0; return; }
+    let ex,ey;
+    if(side==='right'){ex=cx; ey=clamp(by,cy+28,cy+ch-28);}
+    else if(side==='left'){ex=cx+cw; ey=clamp(by,cy+28,cy+ch-28);}
+    else if(side==='below'){ey=cy; ex=clamp(bx,cx+28,cx+cw-28);}
+    else {ey=cy+ch; ex=clamp(bx,cx+28,cx+cw-28);}
+    const hz=side==='right'||side==='left';
+    const d=hz?`M${bx},${by} C${(bx+ex)/2},${by} ${(bx+ex)/2},${ey} ${ex},${ey}`
+              :`M${bx},${by} C${bx},${(by+ey)/2} ${ex},${(by+ey)/2} ${ex},${ey}`;
+    path.setAttribute('d',d); end.setAttribute('cx',ex); end.setAttribute('cy',ey);
+    const L=path.getTotalLength();
+    path.style.transition='none'; path.style.strokeDasharray=L; path.style.strokeDashoffset=animate?L:0;
+    svg.style.opacity=1;
+    if(animate){ path.getBoundingClientRect(); path.style.transition='stroke-dashoffset .55s ease'; path.style.strokeDashoffset=0; }
+  };
+  clearTimeout(TL_T);
+  if(animate){ TL_T=setTimeout(()=>{ place(); card.classList.remove('anim'); void card.offsetWidth; card.classList.add('anim');
+    const nb=card.querySelector('.next'); if(nb) nb.focus({preventScroll:true}); },430); }
+  else place();
+}
+addEventListener('resize',()=>tourLayout(false));
+addEventListener('scroll',()=>{ if(S('tour').classList.contains('on')) tourLayout(false); },{passive:true});
 addEventListener('keydown',e=>{
   if(!S('tour').classList.contains('on')) return;
   if(e.key==='ArrowRight'){e.preventDefault();tourNext();}
