@@ -257,6 +257,77 @@ tbody tr:hover td{background:#161e2c}
  padding:4px 9px;font:700 11px var(--mono);display:none}
 .player .lbl.on{display:block}
 #gmap svg.schem{width:100%;height:100%;display:block}
+/* ── first-visit feature tour ────────────────────────── */
+header,main{transition:filter .45s ease,opacity .45s ease}
+body.touring>header,body.touring>main{filter:blur(5px) saturate(.75);opacity:.35;pointer-events:none;user-select:none}
+.tour{position:fixed;inset:0;z-index:3000;display:none;align-items:center;justify-content:center;padding:22px;
+ background:radial-gradient(ellipse at 50% 45%,rgba(10,13,19,.25),rgba(6,8,12,.82))}
+.tour.on{display:flex}
+.tcard{width:min(580px,100%);background:linear-gradient(180deg,#171f2e,#111621);border:1px solid var(--line2);
+ border-radius:16px;box-shadow:0 34px 90px rgba(0,0,0,.65),0 0 0 1px rgba(240,162,50,.06);overflow:hidden}
+.tcard.anim{animation:tin .38s cubic-bezier(.2,.8,.2,1)}
+@keyframes tin{from{opacity:0;transform:translateY(16px) scale(.985)}}
+.tvis{height:176px;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--line);
+ background:radial-gradient(ellipse at 50% 120%,rgba(240,162,50,.14),transparent 60%),#0d121b;position:relative;overflow:hidden}
+.tbody{padding:20px 26px 4px}
+.tstep{font:600 10px var(--mono);letter-spacing:.16em;color:var(--amber);text-transform:uppercase}
+.tbody h3{margin:7px 0 8px;font-size:22px;letter-spacing:-.01em}
+.tbody p{color:#aab7cb;line-height:1.6;margin:0 0 13px;font-size:14px}
+.tbody .fine{font:11px var(--mono);color:var(--dim);margin:-4px 0 12px}
+.tpts{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.tpts span{font:11px var(--mono);border:1px solid var(--line2);border-radius:12px;padding:4px 10px;background:var(--pane2)}
+.tfoot{display:flex;align-items:center;gap:10px;padding:16px 26px 12px}
+.tfoot .skip{background:none;border:0;color:var(--mut);font:inherit;font-size:13px;cursor:pointer;padding:8px 4px}
+.tfoot .skip:hover{color:var(--fg)}
+.tfoot .next{margin-left:auto;min-width:118px}
+.tnav{display:flex;align-items:center;justify-content:center;gap:12px;padding:0 26px 18px}
+.tdots{display:flex;gap:6px}
+.tdot{width:8px;height:8px;border-radius:4px;background:var(--line2);border:0;padding:0;cursor:pointer;transition:width .25s,background .25s}
+.tdot:hover{background:var(--mut)}
+.tdot.done{background:rgba(240,162,50,.45)}
+.tdot.on{width:26px;background:var(--amber)}
+.tleft{font:10px var(--mono);color:var(--dim);letter-spacing:.06em;min-width:92px}
+.tourbtn{background:none;border:1px solid var(--line2);color:var(--mut);border-radius:14px;padding:4px 11px;
+ font:600 11px var(--mono);cursor:pointer;letter-spacing:.04em}
+.tourbtn:hover{color:var(--fg);border-color:var(--amber)}
+/* tour visuals */
+.tv-brand{text-align:center;font:800 40px/1 system-ui,-apple-system,sans-serif;letter-spacing:-.02em}
+.tv-brand span{color:var(--amber)}
+.tv-brand small{display:block;margin-top:12px;font:600 11px var(--mono);letter-spacing:.2em;color:var(--mut);text-transform:uppercase}
+.tv-pipe{display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:center;padding:0 16px}
+.tv-pipe div{background:var(--pane2);border:1px solid var(--line2);border-radius:9px;padding:10px 12px;font:700 12px var(--mono);text-align:center}
+.tv-pipe div b{display:block;color:var(--amber);font-size:10px;margin-bottom:4px}
+.tv-pipe div.hl{border-color:var(--amber);box-shadow:0 0 18px rgba(240,162,50,.25)}
+.tv-pipe i{color:var(--dim);font-style:normal}
+.tv-grid{display:grid;grid-template-columns:repeat(2,120px);gap:8px}
+.tv-grid div{height:62px;border-radius:7px;border:1px solid var(--line2);background:linear-gradient(135deg,#1a2436,#0e141f);
+ font:700 10px var(--mono);color:var(--mut);padding:7px;position:relative}
+.tv-grid div .rd{position:absolute;right:8px;top:9px;width:7px;height:7px;border-radius:50%;background:var(--red);animation:blink 1.2s infinite}
+.tv-grid div:after{content:'';position:absolute;left:10px;right:10px;bottom:10px;height:14px;border-radius:3px;background:rgba(255,255,255,.05)}
+@keyframes blink{50%{opacity:.25}}
+.tv-det{width:300px;height:132px;border-radius:9px;border:1px solid var(--line2);background:linear-gradient(180deg,#1b2433,#121925);position:relative}
+.tv-det .car{position:absolute;left:112px;top:50px;width:78px;height:44px;border-radius:12px 12px 6px 6px;background:#c8ced8}
+.tv-det .car:after{content:'';position:absolute;left:12px;right:12px;top:7px;height:13px;border-radius:5px;background:#5a6477}
+.tv-det .ring{position:absolute;left:100px;top:38px;width:102px;height:68px;border:3px solid var(--red);border-radius:6px;animation:pulse 1.4s infinite}
+.tv-det .tag{position:absolute;left:100px;top:14px;font:700 10px var(--mono);color:#ff8d96}
+.tv-rows{display:flex;flex-direction:column;gap:9px;width:330px}
+.tv-rows div{display:flex;align-items:center;justify-content:space-between;background:var(--pane2);border:1px solid var(--line);border-radius:8px;padding:8px 11px}
+.tv-rows em{font:600 10px var(--mono);font-style:normal;color:#f7c274}
+.tv-rows em.gn{color:#79e8bb}
+.tv-doc{width:150px;height:140px;background:#f4f4ee;border-radius:6px;padding:14px;color:#111;box-shadow:0 12px 30px rgba(0,0,0,.5);transform:rotate(-3deg)}
+.tv-doc .h{font:800 11px var(--mono);letter-spacing:.12em;text-align:center;border-bottom:2px solid #111;padding-bottom:6px;margin-bottom:10px}
+.tv-doc .l{height:6px;background:#ccc;border-radius:3px;margin:7px 0}
+.tv-doc .l.s{width:60%}
+.tv-doc .amt{margin-top:12px;font:800 16px var(--mono);color:#b3261e}
+.tv-bars{display:flex;align-items:flex-end;gap:12px;height:120px}
+.tv-bars i{width:30px;border-radius:5px 5px 0 0;background:linear-gradient(180deg,var(--amber),rgba(240,162,50,.35));animation:grow .8s ease both}
+.tv-bars i:first-child{background:linear-gradient(180deg,var(--red),rgba(255,77,90,.35))}
+@keyframes grow{from{height:0!important}}
+.tv-map{width:330px;height:150px}
+.tv-map .rt{stroke:var(--amber);stroke-width:3;stroke-dasharray:3 8;stroke-linecap:round;fill:none;animation:dash 1.6s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-22}}
+.tv-map .veh{fill:var(--cyan);stroke:#fff;stroke-width:2}
+
 
 </style></head><body>
 
@@ -271,6 +342,7 @@ tbody tr:hover td{background:#161e2c}
     <button data-p=gis>GIS · Journey</button>
   </nav>
   <div class=spacer></div>
+  <button class=tourbtn onclick="tourOpen(0)" title="Feature preview">▶ Tour</button>
   <div class=clock id=clk>--:--:--</div>
 </header>
 
@@ -370,6 +442,11 @@ tbody tr:hover td{background:#161e2c}
 
 <div class=mask id=mask><div class=modal id=modal></div></div>
 <div id=toast></div>
+
+<!-- first-visit feature tour -->
+<div class=tour id=tour role=dialog aria-modal=true aria-label="Feature preview">
+  <div class=tcard id=tcard></div>
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
@@ -995,6 +1072,112 @@ function gisStopReplay(){
   if(GIS.sel) gisSetPins(GIS.sel.hops);
 }
 S('gPlate').addEventListener('keydown',e=>{if(e.key==='Enter')gisSearch();});
+
+// ── first-visit feature tour ──────────────────────────
+/* Opens once per browser (localStorage), or any time with ?tour or the Tour
+   button. Each step brings its page up behind the blurred overlay. */
+const TOUR_KEY='rr_tour_seen_v1';
+const TV={
+  brand:`<div class=tv-brand>Road<span>Rakshak</span><small>AI traffic enforcement · Team BIOS</small></div>`,
+  pipe:`<div class=tv-pipe>${['Detect','Track','Rules','Plate OCR','Evidence'].map((s,i)=>`<div class="${i===3?'hl':''}"><b>0${i+1}</b>${s}</div>`).join('<i>→</i>')}</div>`,
+  cams:`<div class=tv-grid>${['CAM-01','CAM-02','CAM-05','CAM-06'].map(c=>`<div><span class=rd></span>${c}</div>`).join('')}</div>`,
+  det:`<div class=tv-det><div class=tag>WRONG DIRECTION · UP16BX4521</div><div class=car></div><div class=ring></div></div>`,
+  vio:`<div class=tv-rows>
+        <div><span class=plate>UP16BX4521</span><em>PENDING</em></div>
+        <div><span class="plate unread">NOT READ</span><em>✎ RE-ENTER PLATE</em></div>
+        <div><span class=plate>DL8CAF9032</span><em class=gn>CHALLAN GENERATED</em></div></div>`,
+  challan:`<div class=tv-doc><div class=h>TRAFFIC CHALLAN</div><div class=l></div><div class="l s"></div><div class=l></div><div class="l s"></div><div class=amt>₹ 5,000</div></div>`,
+  bars:`<div class=tv-bars>${[92,70,52,36,20].map((h,i)=>`<i style="height:${h}%;animation-delay:${i*.08}s"></i>`).join('')}</div>`,
+  gis:`<svg class=tv-map viewBox="0 0 330 150">
+        <path class=rt d="M40 120 L120 70 L205 92 L290 32"/>
+        ${[[40,120],[120,70],[205,92],[290,32]].map(([x,y],i)=>`<circle cx=${x} cy=${y} r=12 fill="#f0a232"/><text x=${x} y=${y+4} text-anchor=middle font-family="ui-monospace,Menlo,monospace" font-size=11 font-weight=700 fill="#17181a">${i+1}</text>`).join('')}
+        <circle cx=75 cy=40 r=6 fill="#2e3a4e"/><circle cx=260 cy=120 r=6 fill="#2e3a4e"/></svg>`,
+  replay:`<svg class=tv-map viewBox="0 0 330 150">
+        <path class=rt d="M40 110 L140 60 L290 90"/>
+        ${[[40,110],[140,60],[290,90]].map(([x,y],i)=>`<circle cx=${x} cy=${y} r=12 fill="#f0a232"/><text x=${x} y=${y+4} text-anchor=middle font-family="ui-monospace,Menlo,monospace" font-size=11 font-weight=700 fill="#17181a">${i+1}</text>`).join('')}
+        <circle class=veh r=8><animateMotion dur="3.2s" repeatCount="indefinite" path="M40 110 L140 60 L290 90"/></circle>
+        <g transform="translate(150 118)"><rect x=-44 y=-13 width=88 height=26 rx=13 fill="#182030" stroke="#2e3a4e"/><text x=0 y=4 text-anchor=middle font-family="ui-monospace,Menlo,monospace" font-size=11 font-weight=700 fill="#e9eef7">▶ REPLAY</text></g></svg>`,
+};
+const TOUR=[
+  {tab:'cams',vis:'brand',tag:'Welcome',title:'AI traffic enforcement for Indian roads',
+   text:'Cameras watch the road, AI spots the violation and reads the number plate, and an officer turns it into an e-challan — all from one control room.',
+   fine:'This demo runs on recorded footage from Greater Noida and sample records.',
+   pts:['6 camera locations','Plate recognition','Officer in the loop']},
+  {tab:'cams',vis:'pipe',tag:'How it works',title:'One pipeline, five stages',
+   text:'Every frame goes Detect → Track → Rules → Plate OCR → Evidence. Plates are read only for violators, which keeps the chain light enough for small edge hardware.',
+   pts:['YOLO on ONNX Runtime','CPU only — no GPU','Hash-stamped evidence']},
+  {tab:'cams',vis:'cams',tag:'Camera Wall',title:'Every junction on one screen',
+   text:'Four panels, any of the six cameras — switch a panel from its dropdown. The wall stays clean: alerts go to Detections, never over the video.',
+   pts:['Per-panel camera switch','Timestamped feeds','No alert clutter']},
+  {tab:'det',vis:'det',tag:'Detections',title:'The violation, as it happens',
+   text:'Each detection arrives with the vehicle ringed in the frame, the plate that was read, the camera and the time — newest on top, the full feed below.',
+   pts:['Evidence frame','Plate · camera · time','Live feed']},
+  {tab:'vio',vis:'vio',tag:'Violation records',title:'Nothing is fined without review',
+   text:'Every record waits as PENDING for an officer. A plate the AI could not read is routed to manual entry instead of being dropped, and any plate can be corrected.',
+   pts:['Filter & search','Re-enter plate','Reject false positives']},
+  {tab:'vio',vis:'challan',tag:'E-challan',title:'Generated, not auto-sent',
+   text:'One click fills a printable A4 challan — plate, offence, MV Act section, fine and evidence photos. The officer reviews it, then prints or saves it as PDF.',
+   pts:['MV Act sections','Fine filled in','Print / PDF']},
+  {tab:'ana',vis:'bars',tag:'Analytics',title:'Where enforcement is needed',
+   text:'Hotspots by location, the violation mix and fine totals, updated as records come in — so patrols go where the violations are.',
+   pts:['Worst location','By violation type','Fine totals']},
+  {tab:'gis',vis:'gis',tag:'GIS · Journey',title:'Trace a vehicle across the city',
+   text:'Search by number plate, date, time window or camera. See the vehicle’s photo and its route across cameras on the map, with the time and speed between each one.',
+   pts:['Plate / date / time search','Route on the map','Speed between cameras']},
+  {tab:'gis',vis:'replay',tag:'Footage at every sighting',title:'Jump to the moment it passed',
+   text:'Click any camera on the route to play its clip exactly where the vehicle arrives. Replay walks the whole journey, camera by camera.',
+   pts:['Seek to the sighting','Previous / next camera','▶ Replay journey']},
+];
+let TI=0;
+function tourTab(p){const b=document.querySelector(`nav button[data-p="${p}"]`); if(b&&!b.classList.contains('on')) b.click();}
+function tourOpen(i){
+  closeM(); TI=i||0;
+  document.body.classList.add('touring'); S('tour').classList.add('on');
+  tourRender();
+}
+function tourClose(){
+  document.body.classList.remove('touring'); S('tour').classList.remove('on');
+  try{localStorage.setItem(TOUR_KEY,'1');}catch(_){}
+  tourTab('cams');
+}
+function tourGo(i){TI=Math.max(0,Math.min(TOUR.length-1,i)); tourRender();}
+function tourNext(){TI>=TOUR.length-1?tourClose():tourGo(TI+1);}
+function tourRender(){
+  const t=TOUR[TI], last=TI===TOUR.length-1, left=TOUR.length-1-TI;
+  tourTab(t.tab);
+  const c=S('tcard');
+  c.innerHTML=`
+    <div class=tvis>${TV[t.vis]}</div>
+    <div class=tbody>
+      <div class=tstep>${esc(t.tag)}</div>
+      <h3>${esc(t.title)}</h3>
+      <p>${esc(t.text)}</p>
+      ${t.fine?`<div class=fine>${esc(t.fine)}</div>`:''}
+      <div class=tpts>${t.pts.map(x=>`<span>${esc(x)}</span>`).join('')}</div>
+    </div>
+    <div class=tfoot>
+      <button class=skip onclick="tourClose()">${last?'Close':'Skip preview'}</button>
+      <button class="btn pri next" onclick="tourNext()">${last?'Explore the dashboard':'Next →'}</button>
+    </div>
+    <div class=tnav>
+      <span class=tleft>${TI+1} / ${TOUR.length}</span>
+      <div class=tdots>${TOUR.map((s,i)=>`<button class="tdot${i===TI?' on':i<TI?' done':''}" title="${esc(s.tag)}" aria-label="${esc(s.tag)}" onclick="tourGo(${i})"></button>`).join('')}</div>
+      <span class=tleft style="text-align:right">${left?`${left} more`:'last one'}</span>
+    </div>`;
+  c.classList.remove('anim'); void c.offsetWidth; c.classList.add('anim');
+  const nb=c.querySelector('.next'); if(nb) nb.focus({preventScroll:true});
+}
+addEventListener('keydown',e=>{
+  if(!S('tour').classList.contains('on')) return;
+  if(e.key==='ArrowRight'){e.preventDefault();tourNext();}
+  else if(e.key==='ArrowLeft'){e.preventDefault();tourGo(TI-1);}
+  else if(e.key==='Escape'){e.preventDefault();tourClose();}
+});
+(function tourAuto(){
+  let seen=false; try{seen=localStorage.getItem(TOUR_KEY)==='1';}catch(_){}
+  const force=/[?&]tour\b/.test(location.search);
+  if(force||!seen) setTimeout(()=>tourOpen(0),350);
+})();
 
 // ── nav + toast ───────────────────────────────────────
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
