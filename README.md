@@ -11,13 +11,14 @@ from a laptop or from GitHub Pages.
 
 Live copy: https://devloper-404.github.io/RoadRakshak-Repo/
 
-## Feature preview
+## Feature previews
 
-On the first visit a short guided preview walks through the features one at a
-time — the page it describes opens blurred behind it. **Next →** / **Skip
-preview**, the dots underneath jump to any step and show how many remain, and
-the arrow keys and Esc work too. It shows once per browser; reopen it with the
-**▶ Tour** button in the header, or add `?tour` to the URL.
+The first time you open each tab, a short preview of **that tab's** features
+appears over it, with the page blurred behind. **Next →** / **Skip preview**;
+tabs with two previews show dots underneath (click to jump, "1 more"). Arrow
+keys and Esc work too. Each tab's preview shows once per browser — the
+**ⓘ Preview** button in the header shows the current tab's again, and `?tour`
+in the URL brings every tab's preview back for that visit.
 
 ## Pages
 

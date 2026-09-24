@@ -342,7 +342,7 @@ body.touring>header,body.touring>main{filter:blur(5px) saturate(.75);opacity:.35
     <button data-p=gis>GIS · Journey</button>
   </nav>
   <div class=spacer></div>
-  <button class=tourbtn onclick="tourOpen(0)" title="Feature preview">▶ Tour</button>
+  <button class=tourbtn onclick="tourOpen()" title="Show the preview for this tab">ⓘ Preview</button>
   <div class=clock id=clk>--:--:--</div>
 </header>
 
@@ -1073,10 +1073,14 @@ function gisStopReplay(){
 }
 S('gPlate').addEventListener('keydown',e=>{if(e.key==='Enter')gisSearch();});
 
-// ── first-visit feature tour ──────────────────────────
-/* Opens once per browser (localStorage), or any time with ?tour or the Tour
-   button. Each step brings its page up behind the blurred overlay. */
-const TOUR_KEY='rr_tour_seen_v1';
+// ── per-tab feature previews ──────────────────────────
+/* The first time each tab is opened (per browser), a short preview of THAT
+   tab's features appears over it, with the page blurred behind. The ⓘ button
+   in the header shows the current tab's preview again; ?tour in the URL shows
+   every tab's preview again for this visit. */
+const PV_KEY='rr_preview_seen_v2_';
+const PV_FORCE=/[?&]tour\b/.test(location.search);
+const PV_DONE=new Set();            // shown during this visit
 const TV={
   brand:`<div class=tv-brand>Road<span>Rakshak</span><small>AI traffic enforcement · Team BIOS</small></div>`,
   pipe:`<div class=tv-pipe>${['Detect','Track','Rules','Plate OCR','Evidence'].map((s,i)=>`<div class="${i===3?'hl':''}"><b>0${i+1}</b>${s}</div>`).join('<i>→</i>')}</div>`,
@@ -1099,19 +1103,16 @@ const TV={
         <g transform="translate(150 118)"><rect x=-44 y=-13 width=88 height=26 rx=13 fill="#182030" stroke="#2e3a4e"/><text x=0 y=4 text-anchor=middle font-family="ui-monospace,Menlo,monospace" font-size=11 font-weight=700 fill="#e9eef7">▶ REPLAY</text></g></svg>`,
 };
 const TOUR=[
-  {tab:'cams',vis:'brand',tag:'Welcome',title:'AI traffic enforcement for Indian roads',
-   text:'Cameras watch the road, AI spots the violation and reads the number plate, and an officer turns it into an e-challan — all from one control room.',
-   fine:'This demo runs on recorded footage from Greater Noida and sample records.',
-   pts:['6 camera locations','Plate recognition','Officer in the loop']},
-  {tab:'cams',vis:'pipe',tag:'How it works',title:'One pipeline, five stages',
-   text:'Every frame goes Detect → Track → Rules → Plate OCR → Evidence. Plates are read only for violators, which keeps the chain light enough for small edge hardware.',
-   pts:['YOLO on ONNX Runtime','CPU only — no GPU','Hash-stamped evidence']},
   {tab:'cams',vis:'cams',tag:'Camera Wall',title:'Every junction on one screen',
    text:'Four panels, any of the six cameras — switch a panel from its dropdown. The wall stays clean: alerts go to Detections, never over the video.',
+   fine:'This demo runs on recorded footage from Greater Noida and sample records.',
    pts:['Per-panel camera switch','Timestamped feeds','No alert clutter']},
   {tab:'det',vis:'det',tag:'Detections',title:'The violation, as it happens',
    text:'Each detection arrives with the vehicle ringed in the frame, the plate that was read, the camera and the time — newest on top, the full feed below.',
    pts:['Evidence frame','Plate · camera · time','Live feed']},
+  {tab:'det',vis:'pipe',tag:'How detections are made',title:'One pipeline, five stages',
+   text:'Every frame goes Detect → Track → Rules → Plate OCR → Evidence. Plates are read only for violators, which keeps the chain light enough for small edge hardware.',
+   pts:['YOLO on ONNX Runtime','CPU only — no GPU','Hash-stamped evidence']},
   {tab:'vio',vis:'vio',tag:'Violation records',title:'Nothing is fined without review',
    text:'Every record waits as PENDING for an officer. A plate the AI could not read is routed to manual entry instead of being dropped, and any plate can be corrected.',
    pts:['Filter & search','Re-enter plate','Reject false positives']},
@@ -1128,23 +1129,29 @@ const TOUR=[
    text:'Click any camera on the route to play its clip exactly where the vehicle arrives. Replay walks the whole journey, camera by camera.',
    pts:['Seek to the sighting','Previous / next camera','▶ Replay journey']},
 ];
-let TI=0;
-function tourTab(p){const b=document.querySelector(`nav button[data-p="${p}"]`); if(b&&!b.classList.contains('on')) b.click();}
-function tourOpen(i){
-  closeM(); TI=i||0;
+let PV=[], PVTAB='', TI=0;
+const curTab=()=>{const b=document.querySelector('nav button.on');return b?b.dataset.p:'cams';};
+function pvSeen(tab){
+  if(PV_DONE.has(tab)) return true;
+  if(PV_FORCE) return false;
+  try{return localStorage.getItem(PV_KEY+tab)==='1';}catch(_){return false;}
+}
+function pvMark(tab){PV_DONE.add(tab); try{localStorage.setItem(PV_KEY+tab,'1');}catch(_){}}
+function tourOpen(tab){
+  tab=tab||curTab(); PV=TOUR.filter(t=>t.tab===tab); if(!PV.length) return;
+  closeM(); PVTAB=tab; TI=0;
   document.body.classList.add('touring'); S('tour').classList.add('on');
   tourRender();
 }
+function tourMaybe(tab){ if(!pvSeen(tab)) setTimeout(()=>{ if(curTab()===tab&&!S('tour').classList.contains('on')) tourOpen(tab); },250); }
 function tourClose(){
   document.body.classList.remove('touring'); S('tour').classList.remove('on');
-  try{localStorage.setItem(TOUR_KEY,'1');}catch(_){}
-  tourTab('cams');
+  pvMark(PVTAB);
 }
-function tourGo(i){TI=Math.max(0,Math.min(TOUR.length-1,i)); tourRender();}
-function tourNext(){TI>=TOUR.length-1?tourClose():tourGo(TI+1);}
+function tourGo(i){TI=Math.max(0,Math.min(PV.length-1,i)); tourRender();}
+function tourNext(){TI>=PV.length-1?tourClose():tourGo(TI+1);}
 function tourRender(){
-  const t=TOUR[TI], last=TI===TOUR.length-1, left=TOUR.length-1-TI;
-  tourTab(t.tab);
+  const t=PV[TI], last=TI===PV.length-1, left=PV.length-1-TI, multi=PV.length>1;
   const c=S('tcard');
   c.innerHTML=`
     <div class=tvis>${TV[t.vis]}</div>
@@ -1156,14 +1163,14 @@ function tourRender(){
       <div class=tpts>${t.pts.map(x=>`<span>${esc(x)}</span>`).join('')}</div>
     </div>
     <div class=tfoot>
-      <button class=skip onclick="tourClose()">${last?'Close':'Skip preview'}</button>
-      <button class="btn pri next" onclick="tourNext()">${last?'Explore the dashboard':'Next →'}</button>
+      <button class=skip onclick="tourClose()">Skip preview</button>
+      <button class="btn pri next" onclick="tourNext()">${last?'Got it':'Next →'}</button>
     </div>
-    <div class=tnav>
-      <span class=tleft>${TI+1} / ${TOUR.length}</span>
-      <div class=tdots>${TOUR.map((s,i)=>`<button class="tdot${i===TI?' on':i<TI?' done':''}" title="${esc(s.tag)}" aria-label="${esc(s.tag)}" onclick="tourGo(${i})"></button>`).join('')}</div>
+    ${multi?`<div class=tnav>
+      <span class=tleft>${TI+1} / ${PV.length}</span>
+      <div class=tdots>${PV.map((s,i)=>`<button class="tdot${i===TI?' on':i<TI?' done':''}" title="${esc(s.tag)}" aria-label="${esc(s.tag)}" onclick="tourGo(${i})"></button>`).join('')}</div>
       <span class=tleft style="text-align:right">${left?`${left} more`:'last one'}</span>
-    </div>`;
+    </div>`:'<div style="height:6px"></div>'}`;
   c.classList.remove('anim'); void c.offsetWidth; c.classList.add('anim');
   const nb=c.querySelector('.next'); if(nb) nb.focus({preventScroll:true});
 }
@@ -1173,11 +1180,7 @@ addEventListener('keydown',e=>{
   else if(e.key==='ArrowLeft'){e.preventDefault();tourGo(TI-1);}
   else if(e.key==='Escape'){e.preventDefault();tourClose();}
 });
-(function tourAuto(){
-  let seen=false; try{seen=localStorage.getItem(TOUR_KEY)==='1';}catch(_){}
-  const force=/[?&]tour\b/.test(location.search);
-  if(force||!seen) setTimeout(()=>tourOpen(0),350);
-})();
+setTimeout(()=>tourMaybe(curTab()),350);      // the tab the page opens on
 
 // ── nav + toast ───────────────────────────────────────
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
@@ -1187,6 +1190,7 @@ document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
   keepPlaying();
   if(b.dataset.p==='ana') renderAna();
   if(b.dataset.p==='gis') gisShow();
+  tourMaybe(b.dataset.p);
 });
 function toast(msg,kind){
   const d=document.createElement('div');
