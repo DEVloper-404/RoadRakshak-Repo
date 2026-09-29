@@ -9095,7 +9095,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
           var id = node.getAttribute('data-node-id');
           set(id);
           if (activeIds.indexOf(id) !== -1 && Archify.view && typeof Archify.view.reveal === 'function') {
-            Archify.view.reveal([id], { includeNeighbors: true, reason: 'focus' });
+            Archify.view.reveal([id], { includeNeighbors: false, maxScale: 3, padding: 56, duration: 680, reason: 'focus' });
           }
         }
         else if (activeIds.length) clear();
@@ -9107,7 +9107,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         var id = node.getAttribute('data-node-id');
         set(id);
         if (activeIds.indexOf(id) !== -1 && Archify.view && typeof Archify.view.reveal === 'function') {
-          Archify.view.reveal([id], { includeNeighbors: true, reason: 'focus' });
+          Archify.view.reveal([id], { includeNeighbors: false, maxScale: 3, padding: 56, duration: 680, reason: 'focus' });
         }
       });
       moveBtn.addEventListener('pointerdown', beginLensDrag);
@@ -10694,7 +10694,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
           finishCameraTransaction(transaction, reducedMotion() ? 'reduced-motion' : (document.hidden ? 'hidden' : 'complete'));
           return transaction;
         }
-        var duration = Math.max(180, Math.min(520, Number(options.duration) || 420));
+        var duration = Math.max(180, Math.min(900, Number(options.duration) || 420));
         var startedAt = 0;
         state = start;
         state.mode = 'semantic';
@@ -10765,7 +10765,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
       }
       function syncSemantic() {
         var active = Archify.focus && typeof Archify.focus.active === 'function' ? Archify.focus.active() : null;
-        if (typeof active === 'string') return reveal([active], { includeNeighbors: true, reason: 'focus-sync' });
+        if (typeof active === 'string') return reveal([active], { includeNeighbors: false, maxScale: 3, padding: 56, duration: 680, reason: 'focus-sync' });
         if (Array.isArray(active) && active.length) return reveal(active, { reason: 'selection-sync' });
         return false;
       }
@@ -13905,5 +13905,40 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
       }
     });
   </script>
+<!-- rr-zoom-panel-flip -->
+<script>
+(function () {
+  var svg = document.querySelector('.diagram-container svg');
+  var chip = document.getElementById('focus-chip');
+  if (!svg || !chip) return;
+  var timer = null;
+  function reset() {
+    if (chip.getAttribute('data-rr-flipped') === 'true') {
+      chip.removeAttribute('data-rr-flipped');
+      chip.style.removeProperty('left');
+      chip.style.removeProperty('right');
+    }
+  }
+  function check(node) {
+    if (chip.hidden || chip.hasAttribute('data-manual-placement') || chip.getAttribute('data-rr-flipped') === 'true') return;
+    var n = node.getBoundingClientRect(), c = chip.getBoundingClientRect();
+    var covers = n.left < c.right && n.right > c.left && n.top < c.bottom && n.bottom > c.top;
+    if (!covers) return;
+    chip.style.left = 'auto';          // pinned to the right edge, whatever its width
+    chip.style.right = '1rem';
+    chip.setAttribute('data-rr-flipped', 'true');
+  }
+  function onPick(event) {
+    var node = event.target.closest && event.target.closest('[data-node-id]');
+    reset();
+    clearTimeout(timer);
+    if (node) timer = setTimeout(function () { check(node); }, 900);
+  }
+  // closing the panel (close button, Esc, empty click) puts it back on the left
+  new MutationObserver(function () { if (chip.hidden) reset(); }).observe(chip, { attributes: true, attributeFilter: ['hidden'] });
+  svg.addEventListener('click', onPick, true);
+  svg.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') onPick(e); }, true);
+})();
+</script>
 </body>
 </html>

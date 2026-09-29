@@ -34,7 +34,8 @@ into the static site. Never hand-edit the static copy — a rebuild overwrites i
 | `serve.py` | Tiny stdlib HTTP server. Adds `GET /api/violations` = live listing of `violation/`, and byte-range headers so video scrubbing works. |
 | `build_demo.py` | One-time builder: transcodes raw phone footage from `SIH/data/input_videos/` into `media/videos/`, seeds `violation/` with stills, writes `demo_data.json`. |
 | `README.md` | Short user-facing readme. |
-| `architecture.html` | Standalone animated architecture diagram of the working system (generated with archify; open directly, no build). |
+| `architecture.html` | Standalone animated architecture diagram of the working system (generated with archify; open directly, no build). Clicking a component zooms to 3× on it and opens its description. |
+| `patch_architecture_zoom.py` | Applies that stronger click-zoom to `architecture.html` (the generated viewer frames a component with its neighbours at ≤ 1.9×). Re-run after regenerating the diagram; safe to run twice. |
 
 ### `roadrakshak-demo/` (static site)
 
