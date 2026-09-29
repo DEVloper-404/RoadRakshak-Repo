@@ -34,6 +34,7 @@ into the static site. Never hand-edit the static copy — a rebuild overwrites i
 | `serve.py` | Tiny stdlib HTTP server. Adds `GET /api/violations` = live listing of `violation/`, and byte-range headers so video scrubbing works. |
 | `build_demo.py` | One-time builder: transcodes raw phone footage from `SIH/data/input_videos/` into `media/videos/`, seeds `violation/` with stills, writes `demo_data.json`. |
 | `README.md` | Short user-facing readme. |
+| `architecture.html` | Standalone animated architecture diagram of the working system (generated with archify; open directly, no build). |
 
 ### `roadrakshak-demo/` (static site)
 

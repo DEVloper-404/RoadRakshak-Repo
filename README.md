@@ -10,6 +10,7 @@ from a laptop or from GitHub Pages.
 ```
 
 Live copy: https://devloper-404.github.io/RoadRakshak-Repo/
+Architecture (animated): https://devloper-404.github.io/RoadRakshak-Repo/architecture.html
 
 ## Feature previews
 

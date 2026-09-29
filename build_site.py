@@ -85,6 +85,8 @@ def main() -> int:
         html = html.replace(old, new, 1)
     (HERE / "index.html").write_text(html)
     shutil.copy2(src / "challan.html", HERE / "challan.html")
+    if (src / "architecture.html").exists():      # animated architecture diagram (archify)
+        shutil.copy2(src / "architecture.html", HERE / "architecture.html")
     if (src / "DEVELOPER_GUIDE.md").exists():
         shutil.copy2(src / "DEVELOPER_GUIDE.md", HERE / "DEVELOPER_GUIDE.md")
     shutil.copy2(src / "demo_data.json", HERE / "demo_data.json")
