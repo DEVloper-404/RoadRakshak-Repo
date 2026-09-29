@@ -178,7 +178,7 @@ camera's footage at the moment it passed.
 | `hops[].time` | ISO 8601 with offset. Hops are sorted by time; the route follows that order. |
 | `hops[].video` | Clip to open for this sighting, relative to `demo/`. |
 | `hops[].at` | Second in that clip where the vehicle appears — the player seeks here. |
-| `hops[].dwell` | Seconds the "VEHICLE IN VIEW" ring stays on (default 5). |
+| `hops[].dwell` | Seconds the "VEHICLE IN VIEW" label shows on the clip (default 5). |
 
 ### Behaviour
 
@@ -221,11 +221,11 @@ previews" (`TOUR`, `TV`, `tourLayout()`).
 | GIS · Journey | Trace a vehicle | search bar | plate field |
 | GIS · Journey | Footage at every sighting | the map | a camera pin |
 
-- **When**: first opening of a tab per browser (`localStorage`
-  `rr_preview_seen_v2_<tab>`, set on Skip / Got it). Detections and Violations
-  wait for the first violation to fire from the clips (≤ 8 s), so the
-  spotlight never lands on an empty box.
-- **Again**: **ⓘ Preview** → current tab; `?tour` → all tabs once more this visit.
+- **When**: the first time each tab is opened **on every page load** — nothing
+  is stored, so a reload starts the previews again (`PV_DONE` is an in-memory
+  set). Detections and Violations wait for the first violation to fire from
+  the clips (≤ 8 s), so the spotlight never lands on an empty box.
+- **Again**: the amber-bordered **ⓘ Preview** header button → current tab.
 - **Controls**: Next → / Got it, Skip preview; dots + "N / M · N more" when a
   tab has more than one preview; keys → ← Esc.
 - **Editing a step** (`TOUR` entry): `tab`, `vis` (illustration key in `TV`),
@@ -234,7 +234,6 @@ previews" (`TOUR`, `TV`, `tourLayout()`).
   first visible one wins — and `side` (`right`, `left`, `below`, `above`,
   preferred; the layout falls back to any side with room, or centres the card
   at the bottom on small screens). Re-layout happens on resize and scroll.
-- To show changed previews to everyone again, bump the key to `rr_preview_seen_v3_`.
 
 ---
 

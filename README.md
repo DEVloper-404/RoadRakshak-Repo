@@ -17,9 +17,9 @@ The first time you open each tab, a spotlight preview explains **that tab's**
 feature: the part of the screen that shows it best stays sharp inside a
 glowing ring, everything else blurs and dims, a beacon marks the exact spot and
 a line leads from it to the preview card. **Next →** / **Skip preview**; tabs
-with two previews show dots underneath. Arrow keys and Esc work too. Each tab's
-preview shows once per browser — **ⓘ Preview** in the header shows the current
-tab's again, `?tour` in the URL brings them all back for that visit.
+with two previews show dots underneath. Arrow keys and Esc work too. Previews
+start again on every page load; the amber **ⓘ Preview** button in the header
+shows the current tab's preview at any time.
 
 ## Pages
 

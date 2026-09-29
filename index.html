@@ -249,9 +249,6 @@ img.shot:not([src]){display:none}
 .gacts{display:flex;gap:8px;padding:11px 13px;border-top:1px solid var(--line);flex-wrap:wrap}
 .player{position:relative;background:#000;border-radius:8px;overflow:hidden}
 .player video{width:100%;max-height:60vh;display:block}
-.player .ring{position:absolute;border:3px solid var(--amber);border-radius:10px;
- box-shadow:0 0 0 3px rgba(240,162,50,.3),0 0 22px rgba(240,162,50,.55);display:none;pointer-events:none}
-.player .ring.on{display:block;animation:pulse 1s ease-in-out infinite}
 .player .cap{position:absolute;left:10px;bottom:10px;background:rgba(6,8,12,.82);border:1px solid var(--line2);
  border-radius:6px;padding:5px 9px;font:600 11px var(--mono);letter-spacing:.06em}
 .player .lbl{position:absolute;right:10px;top:10px;background:var(--amber);color:#17181a;border-radius:6px;
@@ -302,9 +299,9 @@ header,main{transition:filter .45s ease,opacity .45s ease}
 .tdot.done{background:rgba(240,162,50,.45)}
 .tdot.on{width:26px;background:var(--amber)}
 .tleft{font:10px var(--mono);color:var(--dim);letter-spacing:.06em;min-width:92px}
-.tourbtn{background:none;border:1px solid var(--line2);color:var(--mut);border-radius:14px;padding:4px 11px;
- font:600 11px var(--mono);cursor:pointer;letter-spacing:.04em}
-.tourbtn:hover{color:var(--fg);border-color:var(--amber)}
+.tourbtn{background:rgba(240,162,50,.08);border:1.5px solid var(--amber);color:#f7c274;border-radius:14px;padding:4px 12px;
+ font:600 11px var(--mono);cursor:pointer;letter-spacing:.04em;box-shadow:0 0 10px rgba(240,162,50,.18)}
+.tourbtn:hover{background:var(--amber);color:#17181a}
 /* tour visuals */
 .tv-brand{text-align:center;font:800 40px/1 system-ui,-apple-system,sans-serif;letter-spacing:-.02em}
 .tv-brand span{color:var(--amber)}
@@ -1023,7 +1020,6 @@ function gisOpenHop(i,auto){
     <div class=modal-bd>
       <div class=player>
         <video id=gv src="${esc(h.video)}" muted playsinline autoplay></video>
-        <div class=ring id=gring style="left:30%;top:30%;width:40%;height:45%"></div>
         <div class=lbl id=glbl>VEHICLE IN VIEW · ${esc(v.plate)}</div>
         <div class=cap id=gcap>${esc(h.camera)} · ${gWhen(h.time)}</div>
       </div>
@@ -1048,7 +1044,7 @@ function gisOpenHop(i,auto){
   if(vid.readyState>=1) seek(); else vid.addEventListener('loadedmetadata',seek,{once:true});
   vid.addEventListener('timeupdate',()=>{
     const inView=vid.currentTime>=at-0.2&&vid.currentTime<=at+dw;
-    S('gring').classList.toggle('on',inView); S('glbl').classList.toggle('on',inView);
+    S('glbl').classList.toggle('on',inView);
     S('gcap').textContent=`${h.camera} · ${gWhen(h.time)} · clip ${fmt(vid.currentTime)}`;
     if(auto&&vid.currentTime>at+dw+0.5) vid.pause();
   });
@@ -1093,13 +1089,11 @@ function gisStopReplay(){
 S('gPlate').addEventListener('keydown',e=>{if(e.key==='Enter')gisSearch();});
 
 // ── per-tab feature previews ──────────────────────────
-/* The first time each tab is opened (per browser), a short preview of THAT
-   tab's features appears over it, with the page blurred behind. The ⓘ button
-   in the header shows the current tab's preview again; ?tour in the URL shows
-   every tab's preview again for this visit. */
-const PV_KEY='rr_preview_seen_v2_';
-const PV_FORCE=/[?&]tour\b/.test(location.search);
-const PV_DONE=new Set();            // shown during this visit
+/* Every page load: the first time each tab is opened, a short preview of THAT
+   tab's features appears over it, with the page blurred behind. Nothing is
+   remembered between loads, so a reload starts the previews again. The ⓘ
+   button in the header shows the current tab's preview any time. */
+const PV_DONE=new Set();            // tabs already previewed during this load
 const TV={
   brand:`<div class=tv-brand>Road<span>Rakshak</span><small>AI traffic enforcement · Team BIOS</small></div>`,
   pipe:`<div class=tv-pipe>${['Detect','Track','Rules','Plate OCR','Evidence'].map((s,i)=>`<div class="${i===3?'hl':''}"><b>0${i+1}</b>${s}</div>`).join('<i>→</i>')}</div>`,
@@ -1150,12 +1144,8 @@ const TOUR=[
 ];
 let PV=[], PVTAB='', TI=0;
 const curTab=()=>{const b=document.querySelector('nav button.on');return b?b.dataset.p:'cams';};
-function pvSeen(tab){
-  if(PV_DONE.has(tab)) return true;
-  if(PV_FORCE) return false;
-  try{return localStorage.getItem(PV_KEY+tab)==='1';}catch(_){return false;}
-}
-function pvMark(tab){PV_DONE.add(tab); try{localStorage.setItem(PV_KEY+tab,'1');}catch(_){}}
+function pvSeen(tab){return PV_DONE.has(tab);}
+function pvMark(tab){PV_DONE.add(tab);}
 function tourOpen(tab){
   tab=tab||curTab(); PV=TOUR.filter(t=>t.tab===tab); if(!PV.length) return;
   closeM(); PVTAB=tab; TI=0;
